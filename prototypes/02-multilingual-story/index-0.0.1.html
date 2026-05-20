@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prototype 02 — Lumi et la boîte mystérieuse</title>
+  <style>
+    :root {
+      --ink: #273044;
+      --muted: #667085;
+      --paper: #fffaf0;
+      --soft: #f3ead7;
+      --accent: #8b5e34;
+      --accent-dark: #5d3b1f;
+      --glow: #f7c873;
+      --green: #5c8a66;
+      --blue: #5d7fa3;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Georgia, "Times New Roman", serif;
+      background:
+        radial-gradient(circle at 12% 15%, rgba(247, 200, 115, 0.22), transparent 28%),
+        linear-gradient(135deg, #efe1c8 0%, #f8f1e5 46%, #dfebee 100%);
+      color: var(--ink);
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      align-items: center;
+      padding: 28px 18px;
+    }
+
+    .stage {
+      width: min(920px, 100%);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 250px minmax(0, 1fr);
+      gap: 26px;
+      align-items: stretch;
+    }
+
+    .scene-visual {
+      background: rgba(255, 250, 240, 0.74);
+      border: 1px solid rgba(139, 94, 52, 0.16);
+      border-radius: 18px;
+      padding: 18px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 460px;
+      box-shadow: 0 18px 50px rgba(61, 48, 34, 0.12);
+    }
+
+    .prototype-label {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .attic {
+      position: relative;
+      margin: 18px auto;
+      width: min(190px, 100%);
+      aspect-ratio: 1 / 1.25;
+      border-radius: 95px 95px 28px 28px;
+      background: linear-gradient(#ceb28c, #8f6844);
+      overflow: hidden;
+      border: 1px solid rgba(93, 59, 31, 0.18);
+    }
+
+    .attic::before {
+      content: "";
+      position: absolute;
+      inset: 16px 26px auto;
+      height: 70px;
+      border-radius: 50%;
+      background: rgba(255, 250, 240, 0.18);
+    }
+
+    .floor {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 34%;
+      background: repeating-linear-gradient(
+        90deg,
+        #715032 0,
+        #715032 18px,
+        #7b5939 18px,
+        #7b5939 36px
+      );
+    }
+
+    .box {
+      position: absolute;
+      left: 50%;
+      bottom: 46px;
+      width: 74px;
+      height: 50px;
+      transform: translateX(-50%);
+      border-radius: 8px;
+      background: #b37d3f;
+      border: 2px solid #6b4420;
+      box-shadow: 0 0 22px rgba(247, 200, 115, 0.65);
+    }
+
+    .box::before {
+      content: "viaje";
+      position: absolute;
+      left: 9px;
+      right: 9px;
+      top: 13px;
+      padding: 2px 0;
+      border-radius: 4px;
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      text-align: center;
+      background: #f5ddb3;
+      color: #5d3b1f;
+    }
+
+    .lumi {
+      position: absolute;
+      left: 24px;
+      bottom: 38px;
+      width: 58px;
+      height: 58px;
+      border-radius: 50% 50% 44% 44%;
+      background: #d8d1c5;
+      border: 2px solid #8e8172;
+    }
+
+    .lumi::before,
+    .lumi::after {
+      content: "";
+      position: absolute;
+      top: -12px;
+      width: 21px;
+      height: 21px;
+      border-radius: 50%;
+      background: #d8d1c5;
+      border: 2px solid #8e8172;
+    }
+
+    .lumi::before {
+      left: 2px;
+    }
+
+    .lumi::after {
+      right: 2px;
+    }
+
+    .face {
+      position: absolute;
+      inset: 19px 12px auto;
+      height: 22px;
+      font-family: Arial, sans-serif;
+      font-size: 18px;
+      text-align: center;
+    }
+
+    .scene-meta {
+      display: grid;
+      gap: 8px;
+      font-family: Arial, sans-serif;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .progress {
+      height: 8px;
+      border-radius: 999px;
+      background: rgba(139, 94, 52, 0.14);
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--green), var(--glow));
+      transition: width 0.35s ease;
+    }
+
+    .story-card {
+      background: rgba(255, 250, 240, 0.88);
+      border: 1px solid rgba(139, 94, 52, 0.16);
+      border-radius: 18px;
+      padding: clamp(22px, 4vw, 42px);
+      min-height: 460px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 18px 50px rgba(61, 48, 34, 0.12);
+    }
+
+    h1 {
+      margin: 0 0 4px;
+      font-size: clamp(28px, 5vw, 46px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin: 0 0 24px;
+      font-family: Arial, sans-serif;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .scene-title {
+      margin: 0 0 16px;
+      font-family: Arial, sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .story-lines {
+      flex: 1;
+      display: grid;
+      align-content: start;
+      gap: 13px;
+      margin-bottom: 24px;
+    }
+
+    .line {
+      margin: 0;
+      font-size: clamp(20px, 3vw, 27px);
+      line-height: 1.42;
+      opacity: 0;
+      transform: translateY(8px);
+      animation: appear 0.42s ease forwards;
+    }
+
+    .line.small {
+      font-size: clamp(17px, 2.4vw, 21px);
+      color: var(--muted);
+    }
+
+    .quote {
+      color: var(--accent-dark);
+      font-style: italic;
+    }
+
+    .foreign {
+      display: inline-block;
+      padding: 9px 12px;
+      border-radius: 10px;
+      background: rgba(93, 127, 163, 0.12);
+      color: #314b67;
+      font-weight: 700;
+    }
+
+    .word-focus {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(247, 200, 115, 0.34);
+      color: var(--accent-dark);
+      font-weight: 700;
+    }
+
+    .question {
+      border-top: 1px solid rgba(139, 94, 52, 0.18);
+      padding-top: 18px;
+      display: grid;
+      gap: 12px;
+      font-family: Arial, sans-serif;
+    }
+
+    .question-title {
+      margin: 0;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.4;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 96px;
+      resize: vertical;
+      border: 1px solid rgba(139, 94, 52, 0.26);
+      border-radius: 12px;
+      padding: 12px;
+      font: 16px Arial, sans-serif;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .choice-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .choice {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(139, 94, 52, 0.18);
+      border-radius: 12px;
+      padding: 11px 12px;
+      background: rgba(255, 255, 255, 0.58);
+      cursor: pointer;
+      line-height: 1.3;
+    }
+
+    .choice input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+    }
+
+    .travel-notebook {
+      border-top: 1px solid rgba(139, 94, 52, 0.18);
+      padding-top: 20px;
+      display: grid;
+      gap: 14px;
+      font-family: Arial, sans-serif;
+      animation: appear 0.42s ease forwards;
+    }
+
+    .travel-notebook h2 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(24px, 4vw, 34px);
+      line-height: 1.15;
+      color: var(--accent-dark);
+    }
+
+    .reflection-card {
+      border: 1px solid rgba(139, 94, 52, 0.16);
+      border-radius: 14px;
+      padding: 14px;
+      background: rgba(255, 255, 255, 0.54);
+    }
+
+    .reflection-card h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      color: var(--accent-dark);
+    }
+
+    .reflection-card p {
+      margin: 7px 0;
+      line-height: 1.45;
+    }
+
+    .answer-echo {
+      display: block;
+      margin: 8px 0;
+      padding: 10px 12px;
+      border-left: 4px solid var(--glow);
+      border-radius: 10px;
+      background: rgba(247, 200, 115, 0.16);
+      color: var(--ink);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 18px;
+      line-height: 1.4;
+    }
+
+    .reflection-list {
+      margin: 8px 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 6px;
+    }
+
+    .reflection-list li {
+      line-height: 1.35;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: auto;
+      font-family: Arial, sans-serif;
+    }
+
+    .soft-note {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 12px 18px;
+      min-width: 132px;
+      background: var(--accent);
+      color: white;
+      font: 700 15px Arial, sans-serif;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(93, 59, 31, 0.18);
+    }
+
+    button:hover {
+      background: var(--accent-dark);
+    }
+
+    button.secondary {
+      min-width: auto;
+      background: transparent;
+      color: var(--accent-dark);
+      box-shadow: none;
+      border: 1px solid rgba(139, 94, 52, 0.26);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @keyframes appear {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 760px) {
+      .app {
+        padding: 14px;
+        align-items: start;
+      }
+
+      .stage {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+
+      .scene-visual {
+        min-height: 210px;
+        grid-template-columns: 1fr 160px;
+        grid-template-rows: auto auto;
+        align-items: center;
+      }
+
+      .attic {
+        grid-row: 1 / span 2;
+        grid-column: 2;
+        width: 138px;
+        margin: 0;
+      }
+
+      .scene-meta {
+        grid-column: 1;
+      }
+
+      .story-card {
+        min-height: 520px;
+      }
+
+      .actions {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="stage">
+      <aside class="scene-visual" aria-label="Repères visuels de l'histoire">
+        <div>
+          <div class="prototype-label">Prototype 02</div>
+          <strong>Lumi et la boîte mystérieuse</strong>
+        </div>
+
+        <div class="attic" aria-hidden="true">
+          <div class="floor"></div>
+          <div class="lumi"><div class="face">•ᴗ•</div></div>
+          <div class="box"></div>
+        </div>
+
+        <div class="scene-meta">
+          <span id="sceneCounter">Scène 1 / 5</span>
+          <div class="progress" aria-hidden="true">
+            <div id="progressBar" class="progress-bar"></div>
+          </div>
+          <span id="languageLabel">FR</span>
+        </div>
+      </aside>
+
+      <main class="story-card">
+        <div id="intro">
+          <h1>Lumi et la boîte mystérieuse</h1>
+          <p class="subtitle">
+            Une petite histoire pour avancer doucement entre plusieurs langues.
+            Rien à réussir. Juste observer, deviner, continuer.
+          </p>
+        </div>
+
+        <div id="sceneTitle" class="scene-title"></div>
+        <div id="storyLines" class="story-lines"></div>
+        <div id="questionBox" class="question hidden"></div>
+
+        <div class="actions">
+          <button id="backBtn" class="secondary hidden" type="button">Revoir</button>
+          <span id="softNote" class="soft-note">Le texte avance petit à petit.</span>
+          <button id="continueBtn" type="button">Commencer</button>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const scenes = [
+      {
+        title: "Scène 1 — Le grenier",
+        language: "FR",
+        blocks: [
+          ["Lumi adore explorer les endroits oubliés."],
+          ["Les dessous d’escaliers.", "Les vieilles bibliothèques.", "Les cartons poussiéreux."],
+          ["Aujourd’hui, elle grimpe dans un vieux grenier.", "Le bois craque un peu.", "Il fait un peu sombre."],
+          ["Lumi s’arrête.", "« Bon… j’ai un peu peur… »", "Elle regarde autour d’elle.", "« …mais juste un petit peu. »"],
+          ["Elle avance quand même.", "Sous une vieille couverture, quelque chose brille.", "Une petite boîte.", "Toute petite.", "Presque à sa taille."],
+          ["Sur le couvercle, un mot est écrit :", "**viaje**", "Lumi penche la tête.", "« Hmm… je ne connais pas ce mot… »", "« …mais il me rappelle quelque chose. »"]
+        ],
+        question: {
+          type: "text",
+          name: "viaje_guess",
+          prompt: "Que penses-tu que ce mot pourrait vouloir dire ?"
+        }
+      },
+      {
+        title: "Scène 2 — L’étiquette",
+        language: "ES",
+        blocks: [
+          ["Lumi pousse doucement la boîte.", "Une petite étiquette tombe."],
+          ["Elle lit lentement :", "> Para quien quiera explorar el mundo."],
+          ["Lumi fronce un peu les moustaches.", "« Je ne comprends pas tout… »"],
+          ["Puis elle sourit un peu.", "« …mais je crois que ça parle d’explorer quelque chose. »"]
+        ],
+        question: {
+          type: "radio",
+          name: "understanding_es",
+          prompt: "As-tu l’impression de comprendre ?",
+          options: ["🙂 Oui", "😐 Un peu", "😵 Pas vraiment"]
+        }
+      },
+      {
+        title: "Scène 3 — Le carnet",
+        language: "IT",
+        blocks: [
+          ["La boîte s’ouvre avec un petit clic.", "À l’intérieur :", "un minuscule carnet."],
+          ["Lumi souffle dessus.", "Un peu de poussière vole.", "Sur la première page :"],
+          ["> Per chi ama viaggiare e osservare."],
+          ["Lumi hésite.", "« Ce n’est pas exactement pareil… »", "« …mais ça ressemble quand même. »"],
+          ["« Oh ! Peut-être que cette boîte voyageait ! »"]
+        ],
+        question: {
+          type: "checkbox",
+          name: "helped_it",
+          prompt: "Qu’est-ce qui t’a aidé ici ?",
+          options: ["des mots ressemblants", "le contexte", "l’histoire", "j’ai deviné", "autre"]
+        }
+      },
+      {
+        title: "Scène 4 — Le petit billet",
+        language: "PT",
+        blocks: [
+          ["Entre les pages du carnet :", "un petit papier plié."],
+          ["Lumi le déplie doucement.", "> Não tenha medo. Continue a explorar."],
+          ["Lumi relit une deuxième fois.", "Puis une troisième."],
+          ["Le grenier semble moins effrayant maintenant."],
+          ["« Je ne comprends pas tout… »", "« …mais je crois que c’est gentil. »"]
+        ],
+        question: {
+          type: "text",
+          name: "notebook_prediction",
+          prompt: "Que penses-tu qu’il y a dans ce carnet ?"
+        }
+      },
+      {
+        title: "Scène 5 — La découverte",
+        language: "FR",
+        blocks: [
+          ["Lumi tourne encore quelques pages.", "À l’intérieur :", "des mots étranges.", "Des petits dessins.", "Des bouts de phrases."],
+          ["Dans plein de langues différentes.", "Lumi sourit doucement."],
+          ["« Peut-être qu’on peut voyager… »", "« …même quand on ne comprend pas tout. »"],
+          ["Puis elle ajoute :", "« Tant qu’on continue à observer. »"],
+          ["🐭", "Tu viens de traverser plusieurs langues.", "As-tu remarqué ?", "Tu as peut-être compris plus de choses…", "> que tu ne le pensais."]
+        ],
+        question: null
+      }
+    ];
+
+    const answers = {};
+    let sceneIndex = 0;
+    let blockIndex = -1;
+    let finished = false;
+    let reflectionShown = false;
+
+    const intro = document.getElementById("intro");
+    const sceneTitle = document.getElementById("sceneTitle");
+    const storyLines = document.getElementById("storyLines");
+    const questionBox = document.getElementById("questionBox");
+    const continueBtn = document.getElementById("continueBtn");
+    const backBtn = document.getElementById("backBtn");
+    const softNote = document.getElementById("softNote");
+    const sceneCounter = document.getElementById("sceneCounter");
+    const languageLabel = document.getElementById("languageLabel");
+    const progressBar = document.getElementById("progressBar");
+
+    function formatLine(text) {
+      if (text.startsWith("> ")) {
+        return `<span class="foreign">${escapeHtml(text.slice(2))}</span>`;
+      }
+
+      if (text.startsWith("**") && text.endsWith("**")) {
+        return `<span class="word-focus">${escapeHtml(text.slice(2, -2))}</span>`;
+      }
+
+      return escapeHtml(text);
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function softAnswer(value, fallback) {
+      const text = String(value || "").trim();
+      return text ? escapeHtml(text) : fallback;
+    }
+
+    function comprehensionLabel(value) {
+      if (value === "🙂 Oui") return "🙂 comprendre";
+      if (value === "😐 Un peu") return "😐 comprendre un peu";
+      if (value === "😵 Pas vraiment") return "😵 être moins sûr";
+      return "garder une impression encore ouverte";
+    }
+
+    function renderTravelNotebook() {
+      reflectionShown = true;
+      finished = true;
+      questionBox.innerHTML = "";
+      questionBox.className = "travel-notebook";
+
+      const viajeGuess = softAnswer(answers.viaje_guess, "une idée encore en train de se former");
+      const comprehension = comprehensionLabel(answers.understanding_es);
+      const helped = Array.isArray(answers.helped_it) && answers.helped_it.length
+        ? answers.helped_it
+        : ["des indices que tu n’as peut-être pas encore nommés"];
+      const notebookGuess = softAnswer(answers.notebook_prediction, "une hypothèse encore mystérieuse");
+
+      questionBox.innerHTML = `
+        <h2>🐭 Ton petit carnet de voyage</h2>
+
+        <section class="reflection-card">
+          <h3>1. Le mot “viaje”</h3>
+          <p>Tu pensais peut-être à :</p>
+          <span class="answer-echo">“${viajeGuess}”</span>
+          <p>Beaucoup de lecteurs utilisent les ressemblances entre langues pour faire des hypothèses.</p>
+        </section>
+
+        <section class="reflection-card">
+          <h3>2. Impression de compréhension</h3>
+          <p>Tu avais l’impression de :</p>
+          <span class="answer-echo">${escapeHtml(comprehension)}</span>
+          <p>Continuer malgré une compréhension partielle est déjà une stratégie intéressante en intercompréhension.</p>
+        </section>
+
+        <section class="reflection-card">
+          <h3>3. Ce qui t’a aidé</h3>
+          <p>Ce qui t’a aidé :</p>
+          <ul class="reflection-list">
+            ${helped.map(item => `<li>✅ ${escapeHtml(item)}</li>`).join("")}
+          </ul>
+          <p>Ces indices servent souvent à continuer à construire du sens.</p>
+        </section>
+
+        <section class="reflection-card">
+          <h3>4. Hypothèse sur le carnet</h3>
+          <p>Tu imaginais :</p>
+          <span class="answer-echo">“${notebookGuess}”</span>
+          <p>Faire des hypothèses est souvent un signe qu’on continue à comprendre activement une histoire.</p>
+        </section>
+
+        <section class="reflection-card">
+          <h3>Conclusion Lumi</h3>
+          <p class="answer-echo">🐭 Peut-être que tu comprends déjà plus de langues que tu ne le pensais.</p>
+        </section>
+      `;
+
+      continueBtn.textContent = "Recommencer";
+      softNote.textContent = "Un miroir doux, pas une validation.";
+      backBtn.classList.remove("hidden");
+    }
+
+    function renderSceneShell() {
+      const scene = scenes[sceneIndex];
+      intro.classList.add("hidden");
+      sceneTitle.textContent = scene.title;
+      sceneCounter.textContent = `Scène ${sceneIndex + 1} / ${scenes.length}`;
+      languageLabel.textContent = `Langue dominante : ${scene.language}`;
+      progressBar.style.width = `${((sceneIndex + 1) / scenes.length) * 100}%`;
+      backBtn.classList.toggle("hidden", sceneIndex === 0 && blockIndex <= 0);
+    }
+
+    function appendBlock(lines) {
+      lines.forEach((line, index) => {
+        const p = document.createElement("p");
+        p.className = line.length < 28 ? "line small" : "line";
+        if (line.startsWith("«")) p.classList.add("quote");
+        p.style.animationDelay = `${index * 120}ms`;
+        p.innerHTML = formatLine(line);
+        storyLines.appendChild(p);
+      });
+    }
+
+    function renderQuestion(question) {
+      questionBox.innerHTML = "";
+      questionBox.classList.remove("hidden");
+
+      const title = document.createElement("p");
+      title.className = "question-title";
+      title.textContent = question.prompt;
+      questionBox.appendChild(title);
+
+      if (question.type === "text") {
+        const field = document.createElement("textarea");
+        field.name = question.name;
+        field.placeholder = "Écris une hypothèse, même fragile.";
+        field.value = answers[question.name] || "";
+        field.addEventListener("input", () => {
+          answers[question.name] = field.value;
+        });
+        questionBox.appendChild(field);
+      }
+
+      if (question.type === "radio" || question.type === "checkbox") {
+        const list = document.createElement("div");
+        list.className = "choice-list";
+
+        question.options.forEach(option => {
+          const label = document.createElement("label");
+          label.className = "choice";
+
+          const input = document.createElement("input");
+          input.type = question.type;
+          input.name = question.name;
+          input.value = option;
+          input.checked = question.type === "checkbox"
+            ? (answers[question.name] || []).includes(option)
+            : answers[question.name] === option;
+
+          input.addEventListener("change", () => {
+            if (question.type === "checkbox") {
+              const checked = [...questionBox.querySelectorAll(`input[name="${question.name}"]:checked`)]
+                .map(item => item.value);
+              answers[question.name] = checked;
+            } else {
+              answers[question.name] = input.value;
+            }
+          });
+
+          label.appendChild(input);
+          label.append(option);
+          list.appendChild(label);
+        });
+
+        questionBox.appendChild(list);
+      }
+    }
+
+    function showNext() {
+      if (finished) {
+        restart();
+        return;
+      }
+
+      const scene = scenes[sceneIndex];
+      renderSceneShell();
+
+      if (blockIndex < scene.blocks.length - 1) {
+        blockIndex += 1;
+        appendBlock(scene.blocks[blockIndex]);
+        continueBtn.textContent = blockIndex === scene.blocks.length - 1 && scene.question
+          ? "Répondre doucement"
+          : "Continuer";
+        softNote.textContent = "Avance à ton rythme.";
+        return;
+      }
+
+      if (scene.question && questionBox.classList.contains("hidden")) {
+        renderQuestion(scene.question);
+        continueBtn.textContent = sceneIndex === scenes.length - 1 ? "Terminer" : "Continuer";
+        softNote.textContent = "Il n’y a pas de bonne ou mauvaise réponse.";
+        return;
+      }
+
+      if (sceneIndex < scenes.length - 1) {
+        sceneIndex += 1;
+        blockIndex = -1;
+        storyLines.innerHTML = "";
+        questionBox.classList.add("hidden");
+        continueBtn.textContent = "Continuer";
+        softNote.textContent = "Une nouvelle langue peut apparaître.";
+        showNext();
+        return;
+      }
+
+      if (!reflectionShown) {
+        renderTravelNotebook();
+        return;
+      }
+
+      finished = true;
+      continueBtn.textContent = "Recommencer";
+      softNote.textContent = "Fin de la V0. Les réponses restent seulement dans cette page.";
+    }
+
+    function goBack() {
+      if (finished) {
+        finished = false;
+        continueBtn.textContent = "Continuer";
+      }
+
+      if (reflectionShown) {
+        reflectionShown = false;
+        questionBox.innerHTML = "";
+        questionBox.className = "question hidden";
+        continueBtn.textContent = "Continuer";
+        softNote.textContent = "Tu peux relire la fin avant le carnet.";
+        return;
+      }
+
+      if (!questionBox.classList.contains("hidden")) {
+        questionBox.classList.add("hidden");
+        continueBtn.textContent = "Continuer";
+        return;
+      }
+
+      if (blockIndex > 0) {
+        blockIndex -= 1;
+        storyLines.innerHTML = "";
+        for (let i = 0; i <= blockIndex; i++) {
+          appendBlock(scenes[sceneIndex].blocks[i]);
+        }
+        renderSceneShell();
+        return;
+      }
+
+      if (sceneIndex > 0) {
+        sceneIndex -= 1;
+        blockIndex = scenes[sceneIndex].blocks.length - 1;
+        storyLines.innerHTML = "";
+        questionBox.classList.add("hidden");
+        for (let i = 0; i <= blockIndex; i++) {
+          appendBlock(scenes[sceneIndex].blocks[i]);
+        }
+        renderSceneShell();
+      }
+    }
+
+    function restart() {
+      sceneIndex = 0;
+      blockIndex = -1;
+      finished = false;
+      reflectionShown = false;
+      storyLines.innerHTML = "";
+      questionBox.innerHTML = "";
+      questionBox.className = "question hidden";
+      intro.classList.remove("hidden");
+      sceneTitle.textContent = "";
+      continueBtn.textContent = "Commencer";
+      softNote.textContent = "Le texte avance petit à petit.";
+      sceneCounter.textContent = "Scène 1 / 5";
+      languageLabel.textContent = "FR";
+      progressBar.style.width = "0";
+      backBtn.classList.add("hidden");
+    }
+
+    continueBtn.addEventListener("click", showNext);
+    backBtn.addEventListener("click", goBack);
+  </script>
+</body>
+</html>
