@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prototype 04 — L’élégance d’être perdu sans paniquer</title>
+  <style>
+    :root {
+      --ink: #25252b;
+      --muted: #6c7078;
+      --paper: #fff9ee;
+      --line: rgba(42, 37, 30, 0.15);
+      --accent: #8a4f2b;
+      --accent-dark: #54301e;
+      --blue: #415f78;
+      --soft-blue: rgba(65, 95, 120, 0.12);
+      --soft-amber: rgba(210, 143, 67, 0.16);
+      --shadow: rgba(37, 31, 24, 0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: Georgia, "Times New Roman", serif;
+      background:
+        radial-gradient(circle at 15% 20%, rgba(210, 143, 67, 0.18), transparent 26%),
+        linear-gradient(135deg, #e5ded1 0%, #f8efe1 45%, #d8e1e5 100%);
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 28px 18px;
+    }
+
+    .journey {
+      width: min(1000px, 100%);
+      display: grid;
+      grid-template-columns: 265px minmax(0, 1fr);
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .side {
+      min-height: 560px;
+      border-radius: 16px;
+      padding: 22px;
+      background: linear-gradient(160deg, #26333a, #5b483c);
+      color: #fff7ed;
+      box-shadow: 0 20px 55px var(--shadow);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .side::after {
+      content: "";
+      position: absolute;
+      inset: auto -20px -36px;
+      height: 140px;
+      background: repeating-linear-gradient(
+        90deg,
+        rgba(255,255,255,0.08) 0,
+        rgba(255,255,255,0.08) 18px,
+        transparent 18px,
+        transparent 36px
+      );
+      transform: rotate(-4deg);
+    }
+
+    .label {
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: rgba(255, 247, 237, 0.74);
+      position: relative;
+      z-index: 1;
+    }
+
+    .sign {
+      align-self: center;
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 16px;
+      padding: 22px 16px;
+      border: 1px solid rgba(255, 247, 237, 0.2);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.06);
+      text-align: center;
+    }
+
+    .sign .icon {
+      font-size: 44px;
+    }
+
+    .sign strong {
+      font-size: 22px;
+      line-height: 1.25;
+      font-weight: 500;
+    }
+
+    .meta {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 10px;
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      color: rgba(255, 247, 237, 0.78);
+    }
+
+    .progress {
+      height: 7px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.16);
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0;
+      border-radius: inherit;
+      background: #efc078;
+      transition: width 0.35s ease;
+    }
+
+    .card {
+      min-height: 560px;
+      padding: clamp(24px, 4.5vw, 52px);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 249, 238, 0.9);
+      box-shadow: 0 20px 55px var(--shadow);
+      display: flex;
+      flex-direction: column;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(31px, 5vw, 50px);
+      line-height: 1.05;
+      font-weight: 500;
+      letter-spacing: 0;
+    }
+
+    .subtitle,
+    .note {
+      margin: 0;
+      color: var(--muted);
+      font-family: Arial, sans-serif;
+      line-height: 1.5;
+    }
+
+    .scene-title {
+      margin: 0 0 18px;
+      color: var(--accent);
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .lines {
+      flex: 1;
+      display: grid;
+      align-content: start;
+      gap: 13px;
+      margin-bottom: 26px;
+    }
+
+    .line {
+      margin: 0;
+      font-size: clamp(21px, 3vw, 29px);
+      line-height: 1.48;
+      opacity: 0;
+      transform: translateY(7px);
+      animation: appear 0.42s ease forwards;
+    }
+
+    .line.small {
+      font-size: clamp(17px, 2.4vw, 21px);
+      color: var(--muted);
+    }
+
+    .foreign {
+      display: inline-block;
+      padding: 9px 12px;
+      border-radius: 9px;
+      background: var(--soft-blue);
+      color: #273f52;
+      font-weight: 700;
+    }
+
+    .false-friend {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: var(--soft-amber);
+      color: var(--accent-dark);
+      font-weight: 700;
+    }
+
+    .question,
+    .traces {
+      border-top: 1px solid var(--line);
+      padding-top: 18px;
+      display: grid;
+      gap: 12px;
+      font-family: Arial, sans-serif;
+    }
+
+    .question-title {
+      margin: 0;
+      font-weight: 700;
+      line-height: 1.45;
+    }
+
+    .choice-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .choice {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: rgba(255, 255, 255, 0.54);
+      cursor: pointer;
+    }
+
+    .choice input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+    }
+
+    .trace-card {
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.55);
+    }
+
+    .trace-card h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+      color: var(--accent-dark);
+    }
+
+    .trace-card p {
+      margin: 7px 0;
+      line-height: 1.45;
+    }
+
+    .trace-list {
+      margin: 6px 0;
+      padding-left: 18px;
+      line-height: 1.45;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: auto;
+      font-family: Arial, sans-serif;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 12px 18px;
+      min-width: 132px;
+      background: var(--accent);
+      color: white;
+      font: 700 15px Arial, sans-serif;
+      cursor: pointer;
+      box-shadow: 0 10px 22px rgba(37, 31, 24, 0.15);
+    }
+
+    button:hover {
+      background: var(--accent-dark);
+    }
+
+    button.secondary {
+      min-width: auto;
+      background: transparent;
+      color: var(--accent-dark);
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @keyframes appear {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 760px) {
+      .app {
+        padding: 14px;
+      }
+
+      .journey {
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+
+      .side {
+        min-height: 190px;
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto auto;
+      }
+
+      .sign {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        width: 138px;
+        align-self: stretch;
+        place-items: center;
+      }
+
+      .sign strong {
+        display: none;
+      }
+
+      .card {
+        min-height: 560px;
+      }
+
+      .actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="journey">
+      <aside class="side" aria-label="Carnet de journée">
+        <div>
+          <div class="label">Prototype 04</div>
+          <strong>Faux amis</strong>
+        </div>
+
+        <div class="sign" aria-hidden="true">
+          <span class="icon">☕</span>
+          <strong>une petite journée de faux amis</strong>
+        </div>
+
+        <div class="meta">
+          <span id="sceneCounter">Scène 1 / 5</span>
+          <div class="progress" aria-hidden="true">
+            <div id="progressBar" class="progress-bar"></div>
+          </div>
+          <span id="toneLabel">hypothèses en mouvement</span>
+        </div>
+      </aside>
+
+      <main class="card">
+        <div id="intro">
+          <h1>L’élégance d’être perdu sans paniquer</h1>
+          <p class="subtitle">Une petite journée de faux amis. Pas un test. Plutôt une promenade dans des hypothèses qui tiennent… jusqu’à ce qu’elles bougent.</p>
+        </div>
+
+        <div id="sceneTitle" class="scene-title"></div>
+        <div id="storyLines" class="lines"></div>
+        <div id="questionBox" class="question hidden"></div>
+
+        <div class="actions">
+          <button id="backBtn" class="secondary hidden" type="button">Revenir</button>
+          <p id="softNote" class="note">La journée commence tranquillement.</p>
+          <button id="continueBtn" type="button">Commencer</button>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script>
+    const scenes = [
+      {
+        title: "Scène 1 — Arrivée",
+        blocks: [
+          ["Le train s’arrête.", "Petite ville espagnole.", "Pas touristique."],
+          ["Juste assez inconnue pour être excitante.", "Vous descendez avec votre sac.", "Il fait chaud."],
+          ["Les conversations autour de vous ressemblent à du français…", "mais pas vraiment."],
+          ["Et pourtant :", "vous comprenez plein de petites choses.", "Panneaux.", "Horaires.", "Prix.", "Directions."],
+          ["Très vite, une pensée traverse votre esprit :", "> En fait… ça va être facile."]
+        ],
+        question: {
+          type: "radio",
+          name: "arrival_confidence",
+          prompt: "À ce moment-là, comment évaluez-vous votre confiance ?",
+          options: ["très confiant", "plutôt confiant", "prudent", "déjà un peu perdu"]
+        }
+      },
+      {
+        title: "Scène 2 — Le café",
+        blocks: [
+          ["Vous posez votre sac.", "Petite terrasse.", "Une chaise un peu bancale.", "Serveur souriant."],
+          ["La carte est courte.", "Quelques mots semblent familiers.", "Pas tous.", "Mais assez."],
+          ["Vous repérez café.", "Vous repérez aussi <span class=\"false-friend\">bocadillo</span>.", "Votre imagination fait le reste."],
+          ["Vous osez commander."],
+          ["🇪🇸", "> Un café y un bocadillo, por favor."],
+          ["Ça sort tout seul.", "Le serveur sourit.", "🇪🇸", "> Perfecto."],
+          ["Petite victoire intérieure.", "Vous vous sentez presque bilingue.", "Discrètement.", "Mais presque."],
+          ["Vous attendez.", "Vous regardez passer les gens.", "La ville commence à devenir moins étrangère."],
+          ["Le café arrive.", "Puis une assiette.", "Et là…"],
+          ["quelque chose ne colle pas."],
+          ["Le <span class=\"false-friend\">bocadillo</span> ne ressemble pas du tout à l’image mentale que vous aviez fabriquée.", "Vous restez quelques secondes à observer l’assiette.", "Pain.", "Garniture.", "Évidence locale.", "Petit flottement intérieur."],
+          ["Vous ne dites rien.", "Vous réorganisez simplement le monde autour de cette assiette."]
+        ],
+        question: {
+          type: "radio",
+          name: "bocadillo_shift",
+          prompt: "À quel moment quelque chose vous a semblé étrange ?",
+          options: ["dès le mot “bocadillo”", "quand le serveur a répondu", "quand l’assiette est arrivée", "rien ne m’a surpris"]
+        }
+      },
+      {
+        title: "Scène 3 — Le rhume inattendu",
+        blocks: [
+          ["Après le café, le serveur revient vers votre table.", "Il semble vouloir parler un peu.", "Vous comprenez assez pour répondre simplement."],
+          ["La conversation avance doucement.", "Météo.", "Train.", "Ville.", "Rien de spectaculaire."],
+          ["Puis il sourit avec fatigue.", "Il porte la main à son nez."],
+          ["🇪🇸", "> Estoy constipado."],
+          ["Votre cerveau attrape le mot trop vite.", "<span class=\"false-friend\">constipado</span>.", "Il croit tenir quelque chose."],
+          ["Mais l’homme tousse.", "Il sort un mouchoir.", "Il parle du frío.", "Du nez.", "De la nuit mal dormie."],
+          ["Il refuse un verre trop froid.", "Il rit un peu.", "Vous riez aussi, avec un léger retard."],
+          ["Le mot ne s’effondre pas brutalement.", "Il glisse.", "Il se déplace.", "Vous le laissez changer de place."]
+        ],
+        question: {
+          type: "radio",
+          name: "constipado_shift",
+          prompt: "Qu’est-ce qui vous a fait réviser votre hypothèse ?",
+          options: ["le mot semblait évident au début", "les gestes / le contexte", "les mots autour", "j’ai compris seulement après coup", "je ne suis pas sûr"]
+        }
+      },
+      {
+        title: "Scène 4 — Conversation",
+        blocks: [
+          ["Plus tard, vous traversez un petit parc.", "L’air est moins chaud.", "Les bancs sont presque tous occupés."],
+          ["Quelqu’un vous demande si la place est libre.", "Vous répondez.", "La conversation commence sans cérémonie."],
+          ["Vous comprenez presque tout.", "Assez pour suivre.", "Assez pour répondre au bon moment."],
+          ["Vous êtes même un peu fier.", "Une fierté raisonnable.", "Pas triomphale.", "Mais présente."],
+          ["Puis :"],
+          ["🇪🇸", "> Estoy embarazada."],
+          ["Votre cerveau répond immédiatement :", "> Ah mince… elle est embarrassée."],
+          ["Vous hochez la tête avec une compassion très polie.", "Peut-être un peu trop solennelle."],
+          ["Elle continue.", "Elle parle d’un bébé."],
+          ["Puis de famille.", "De prénom.", "D’un rendez-vous médical.", "D’une naissance au printemps."],
+          ["Les indices arrivent un à un.", "Ils ne crient pas.", "Ils insistent simplement."],
+          ["Ah.", "Non.", "Pas embarrassée.", "Enceinte."],
+          ["Petit silence intérieur.", "Puis un sourire.", "> Bon… ok.", "Le sens vient de changer de chaise."]
+        ],
+        question: {
+          type: "radio",
+          name: "embarazada_shift",
+          prompt: "Quand avez-vous changé d’hypothèse ?",
+          options: ["immédiatement", "au mot “bébé”", "avec les indices suivants", "seulement à la fin", "je n’avais pas fait cette hypothèse"]
+        }
+      },
+      {
+        title: "Scène 5 — Banc du soir",
+        blocks: [
+          ["Le soleil descend un peu.", "Vous êtes assis sur un banc.", "La journée repasse dans votre tête."],
+          ["<span class=\"false-friend\">bocadillo</span>", "<span class=\"false-friend\">constipado</span>", "<span class=\"false-friend\">embarazada</span>"],
+          ["Vous avez parfois compris.", "Parfois complètement raté.", "Parfois réinventé le sens."],
+          ["Et pourtant…", "vous avez continué."],
+          ["Pas parce que tout était clair.", "Mais parce que le monde continuait à donner des indices."],
+          ["Un peu plus loin, quelqu’un rit.", "Une phrase vous revient :"],
+          ["🇮🇹", "> Forse capire significa anche perdersi un po’."],
+          ["Vous ne comprenez pas complètement.", "Mais cette fois…", "ça ne vous dérange plus."]
+        ],
+        question: null
+      }
+    ];
+
+    const answers = {};
+    let sceneIndex = 0;
+    let blockIndex = -1;
+    let finished = false;
+    let tracesShown = false;
+
+    const intro = document.getElementById("intro");
+    const sceneTitle = document.getElementById("sceneTitle");
+    const storyLines = document.getElementById("storyLines");
+    const questionBox = document.getElementById("questionBox");
+    const continueBtn = document.getElementById("continueBtn");
+    const backBtn = document.getElementById("backBtn");
+    const softNote = document.getElementById("softNote");
+    const sceneCounter = document.getElementById("sceneCounter");
+    const progressBar = document.getElementById("progressBar");
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function formatLine(text) {
+      if (text.startsWith("> ")) {
+        return `<span class="foreign">${escapeHtml(text.slice(2))}</span>`;
+      }
+
+      return renderAllowedInline(text);
+    }
+
+    function renderAllowedInline(text) {
+      const markerPattern = /<span class="false-friend">([^<]+)<\/span>/g;
+      let html = "";
+      let cursor = 0;
+      let match;
+
+      while ((match = markerPattern.exec(text)) !== null) {
+        html += escapeHtml(text.slice(cursor, match.index));
+        html += `<span class="false-friend">${escapeHtml(match[1])}</span>`;
+        cursor = markerPattern.lastIndex;
+      }
+
+      html += escapeHtml(text.slice(cursor));
+      return html;
+    }
+
+    function answerOrTrace(value, fallback) {
+      return value || fallback;
+    }
+
+    function renderTraces() {
+      tracesShown = true;
+      finished = true;
+      questionBox.innerHTML = "";
+      questionBox.className = "traces";
+
+      const arrival = answerOrTrace(answers.arrival_confidence, "une confiance difficile à situer");
+      const bocadillo = answerOrTrace(answers.bocadillo_shift, "un moment de surprise resté flou");
+      const constipado = answerOrTrace(answers.constipado_shift, "un ajustement difficile à nommer");
+      const embarazada = answerOrTrace(answers.embarazada_shift, "un changement d’hypothèse discret");
+
+      questionBox.innerHTML = `
+        <h2>Vos traces de flottement</h2>
+
+        <section class="trace-card">
+          <h3>Confiance de départ</h3>
+          <p>Au début, votre confiance semblait plutôt : <strong>${escapeHtml(arrival)}</strong>.</p>
+          <p>À certains moments, une hypothèse semblait évidente.</p>
+        </section>
+
+        <section class="trace-card">
+          <h3>Premier décalage</h3>
+          <p>Pour <em>bocadillo</em>, le déplacement s’est peut-être produit : <strong>${escapeHtml(bocadillo)}</strong>.</p>
+          <p>Le contexte a commencé à déplacer le sens.</p>
+        </section>
+
+        <section class="trace-card">
+          <h3>Réparation du sens</h3>
+          <p>Devant <em>constipado</em>, vous avez indiqué : <strong>${escapeHtml(constipado)}</strong>.</p>
+          <p>Ce n’est pas un échec : c’est souvent comme cela que la compréhension se répare.</p>
+        </section>
+
+        <section class="trace-card">
+          <h3>Hypothèse qui craque</h3>
+          <p>Avec <em>embarazada</em>, le changement est peut-être arrivé : <strong>${escapeHtml(embarazada)}</strong>.</p>
+          <p>Un faux ami peut être une hypothèse plausible qui craque au contact du contexte.</p>
+        </section>
+
+        <section class="trace-card">
+          <h3>Phrase de poche</h3>
+          <p><strong>L’élégance d’être perdu sans paniquer.</strong></p>
+          <p>Comprendre, parfois, c’est accepter de réajuster sans se crisper.</p>
+        </section>
+      `;
+
+      continueBtn.textContent = "Recommencer";
+      softNote.textContent = "Pas de bilan. Juste quelques traces.";
+      backBtn.classList.remove("hidden");
+    }
+
+    function renderSceneShell() {
+      intro.classList.add("hidden");
+      sceneTitle.textContent = scenes[sceneIndex].title;
+      sceneCounter.textContent = `Scène ${sceneIndex + 1} / ${scenes.length}`;
+      progressBar.style.width = `${((sceneIndex + 1) / scenes.length) * 100}%`;
+      backBtn.classList.toggle("hidden", sceneIndex === 0 && blockIndex <= 0);
+    }
+
+    function appendBlock(lines) {
+      lines.forEach((line, index) => {
+        const p = document.createElement("p");
+        p.className = line.length < 32 ? "line small" : "line";
+        p.style.animationDelay = `${index * 120}ms`;
+        p.innerHTML = formatLine(line);
+        storyLines.appendChild(p);
+      });
+    }
+
+    function renderQuestion(question) {
+      questionBox.innerHTML = "";
+      questionBox.className = "question";
+
+      const title = document.createElement("p");
+      title.className = "question-title";
+      title.textContent = question.prompt;
+      questionBox.appendChild(title);
+
+      const list = document.createElement("div");
+      list.className = "choice-list";
+
+      question.options.forEach(option => {
+        const label = document.createElement("label");
+        label.className = "choice";
+
+        const input = document.createElement("input");
+        input.type = question.type;
+        input.name = question.name;
+        input.value = option;
+        input.checked = answers[question.name] === option;
+        input.addEventListener("change", () => {
+          answers[question.name] = input.value;
+        });
+
+        label.appendChild(input);
+        label.append(option);
+        list.appendChild(label);
+      });
+
+      questionBox.appendChild(list);
+    }
+
+    function showNext() {
+      if (finished) {
+        restart();
+        return;
+      }
+
+      const scene = scenes[sceneIndex];
+      renderSceneShell();
+
+      if (blockIndex < scene.blocks.length - 1) {
+        blockIndex += 1;
+        appendBlock(scene.blocks[blockIndex]);
+        continueBtn.textContent = blockIndex === scene.blocks.length - 1 && scene.question
+          ? "Noter ce flottement"
+          : "Continuer";
+        softNote.textContent = "Avancez sans vous presser.";
+        return;
+      }
+
+      if (scene.question && questionBox.classList.contains("hidden")) {
+        renderQuestion(scene.question);
+        continueBtn.textContent = "Continuer";
+        softNote.textContent = "Il ne s’agit pas de trouver juste.";
+        return;
+      }
+
+      if (sceneIndex < scenes.length - 1) {
+        sceneIndex += 1;
+        blockIndex = -1;
+        storyLines.innerHTML = "";
+        questionBox.className = "question hidden";
+        continueBtn.textContent = "Continuer";
+        softNote.textContent = "Le sens se réorganise parfois tout seul.";
+        showNext();
+        return;
+      }
+
+      if (!tracesShown) {
+        renderTraces();
+      }
+    }
+
+    function goBack() {
+      if (finished) {
+        finished = false;
+        continueBtn.textContent = "Continuer";
+      }
+
+      if (tracesShown) {
+        tracesShown = false;
+        questionBox.innerHTML = "";
+        questionBox.className = "question hidden";
+        softNote.textContent = "Vous pouvez relire le banc du soir.";
+        return;
+      }
+
+      if (!questionBox.classList.contains("hidden")) {
+        questionBox.className = "question hidden";
+        continueBtn.textContent = "Continuer";
+        return;
+      }
+
+      if (blockIndex > 0) {
+        blockIndex -= 1;
+        storyLines.innerHTML = "";
+        for (let i = 0; i <= blockIndex; i++) {
+          appendBlock(scenes[sceneIndex].blocks[i]);
+        }
+        renderSceneShell();
+        return;
+      }
+
+      if (sceneIndex > 0) {
+        sceneIndex -= 1;
+        blockIndex = scenes[sceneIndex].blocks.length - 1;
+        storyLines.innerHTML = "";
+        questionBox.className = "question hidden";
+        for (let i = 0; i <= blockIndex; i++) {
+          appendBlock(scenes[sceneIndex].blocks[i]);
+        }
+        renderSceneShell();
+      }
+    }
+
+    function restart() {
+      sceneIndex = 0;
+      blockIndex = -1;
+      finished = false;
+      tracesShown = false;
+      storyLines.innerHTML = "";
+      questionBox.innerHTML = "";
+      questionBox.className = "question hidden";
+      intro.classList.remove("hidden");
+      sceneTitle.textContent = "";
+      continueBtn.textContent = "Commencer";
+      softNote.textContent = "La journée commence tranquillement.";
+      sceneCounter.textContent = "Scène 1 / 5";
+      progressBar.style.width = "0";
+      backBtn.classList.add("hidden");
+    }
+
+    continueBtn.addEventListener("click", showNext);
+    backBtn.addEventListener("click", goBack);
+  </script>
+</body>
+</html>
