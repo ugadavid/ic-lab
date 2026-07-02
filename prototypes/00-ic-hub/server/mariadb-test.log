@@ -1,0 +1,16 @@
+[startup] store mode mariadb
+[startup] data directory J:\2026\UGA\M2\Stage-Memoire\Applications\IC-Lab\prototypes\00-ic-hub\server\data
+[startup] data files users.json, sessions.json, courses.json, enrollments.json, course-activities.json, prototypes.json, runs.json, institutions.json, activity-ownership.json, sharing-spaces.json
+ic-hub-local 0.6 listening on http://localhost:8790
+[startup] public directory J:\2026\UGA\M2\Stage-Memoire\Applications\IC-Lab\prototypes\00-ic-hub\public
+[startup] active store mariadb
+[auth] login ok admin@demo.local (admin)
+[auth] login ok teacher@demo.local (teacher)
+[auth] login ok teacher2@demo.local (teacher)
+[auth] login ok student@demo.local (student)
+[runs] start run_569fc8f8-022c-4964-94e0-d5e196f6300e student=user_student_demo assignment=assign_021c5b78-1473-458b-951d-721b47dfb2b0
+[runs] event proto_loaded run=run_569fc8f8-022c-4964-94e0-d5e196f6300e
+[runs] event activity_loaded run=run_569fc8f8-022c-4964-94e0-d5e196f6300e
+[runs] event meeting_started run=run_569fc8f8-022c-4964-94e0-d5e196f6300e
+[runs] event user_answer_submitted run=run_569fc8f8-022c-4964-94e0-d5e196f6300e
+[runs] event activity_completed run=run_569fc8f8-022c-4964-94e0-d5e196f6300e

@@ -1,0 +1,334 @@
+{
+  "sessions": [
+    {
+      "token": "ed934d180614560ba8dba5c4297cc37db354ead73c5cef76962fe9570e9e8892",
+      "userId": "user_admin_demo",
+      "createdAt": "2026-07-02T09:29:08.970Z",
+      "lastSeenAt": "2026-07-02T09:29:08.970Z"
+    },
+    {
+      "token": "9aa0015c91ad443dcc5d0fc320b23412aa9b2d794e00308e5ab7f31f9326a31a",
+      "userId": "user_teacher_demo",
+      "createdAt": "2026-07-02T09:29:09.004Z",
+      "lastSeenAt": "2026-07-02T09:29:09.004Z"
+    },
+    {
+      "token": "db9d84b09f5cbd6410cdfe5b2cb9c9540d4481a502371949f954c71fe71c8cc4",
+      "userId": "user_student_demo",
+      "createdAt": "2026-07-02T09:29:09.037Z",
+      "lastSeenAt": "2026-07-02T09:29:09.037Z"
+    },
+    {
+      "token": "c7a95c666b9d58f4c37bf0857fc5cd30496f1f9e89a69143765fc1e88b560893",
+      "userId": "user_admin_demo",
+      "createdAt": "2026-07-02T09:48:09.496Z",
+      "lastSeenAt": "2026-07-02T09:48:09.496Z"
+    },
+    {
+      "token": "bfe6859fe187c508948b13651e8432433b7b2208e3120b0d045b7214a896d3da",
+      "userId": "user_teacher_demo",
+      "createdAt": "2026-07-02T09:48:09.533Z",
+      "lastSeenAt": "2026-07-02T09:48:09.533Z"
+    },
+    {
+      "token": "38a299f2ce9072e2ea264a30921ca3c660f3e803fb3cc19ac905221f7f78f822",
+      "userId": "user_student_demo",
+      "createdAt": "2026-07-02T09:48:09.567Z",
+      "lastSeenAt": "2026-07-02T09:48:09.567Z"
+    },
+    {
+      "token": "52af8d49a8b6165701174d08782a3959c733f338aa927bdaacb91e05efa8d7c2",
+      "userId": "user_admin_demo",
+      "createdAt": "2026-07-02T09:48:40.204Z",
+      "lastSeenAt": "2026-07-02T09:48:40.204Z"
+    },
+    {
+      "token": "224f94369e6e915385dcf31c4b0eace9b8ba21189ab3a7bafd2f5a4c11dac9a9",
+      "userId": "user_admin_demo",
+      "createdAt": "2026-07-02T09:48:53.905Z",
+      "lastSeenAt": "2026-07-02T09:48:53.905Z"
+    },
+    {
+      "token": "ea80351df5f2277c1182b6122c234d7d1c8b17a4172b5385979d7a3f74715868",
+      "userId": "user_teacher_demo",
+      "createdAt": "2026-07-02T09:48:53.938Z",
+      "lastSeenAt": "2026-07-02T09:48:53.938Z"
+    },
+    {
+      "token": "9618c7e109c6c9e8233e7c057cb61914a59ac359e7450dcbdd019dca85b85ce9",
+      "userId": "user_student_demo",
+      "createdAt": "2026-07-02T09:48:53.971Z",
+      "lastSeenAt": "2026-07-02T09:48:53.971Z"
+    },
+    {
+      "token": "f09f504cefa55dbd704af39d122e077f25f1633a5c84301da095dd4b8bc9fc52",
+      "userId": "user_admin_demo",
+      "createdAt": "2026-07-02T09:51:25.930Z",
+      "lastSeenAt": "2026-07-02T09:51:25.930Z"
+    },
+    {
+      "token": "b53d7712bd70ab05ae02d0479fa071f43396129d7612a2477063b463856b1bba",
+      "userId": "user_admin_demo",
+      "createdAt": "2026-07-02T09:52:12.855Z",
+      "lastSeenAt": "2026-07-02T09:52:12.855Z"
+    },
+    {
+      "token": "235108ed4e5ecdd8630a99cabc065c9423b549ee518b8371d639aa58d861614d",
+      "userId": "user_admin_demo",
+      "createdAt": "2026-07-02T09:55:53.655Z",
+      "lastSeenAt": "2026-07-02T09:55:53.655Z"
+    },
+    {
+      "token": "bc2734523ab7ec185400466983f9fbc3a285f8450e1d822f0b93b340aad18ffe",
+      "userId": "user_teacher_demo",
+      "createdAt": "2026-07-02T09:55:53.689Z",
+      "lastSeenAt": "2026-07-02T09:55:53.689Z"
+    },
+    {
+      "token": "46949850545d76d292f2245e099a3115cc7fe04d629a7221ff9672ee80883175",
+      "userId": "user_student_demo",
+      "createdAt": "2026-07-02T09:55:53.723Z",
+      "lastSeenAt": "2026-07-02T09:55:53.723Z"
+    },
+    {
+      "token": "ef2578aa63b6fbacc050ff355c7f583d6d49789d4f4c4f1fd34d49d7adefa9e6",
+      "userId": "user_admin_demo",
+      "createdAt": "2026-07-02T13:10:45.536Z",
+      "lastSeenAt": "2026-07-02T13:10:45.536Z"
+    },
+    {
+      "token": "60b34e5a4ab680dab97ae0d8090c43b408cc68cecddd84eac48a560c56dff595",
+      "userId": "user_teacher_demo",
+      "createdAt": "2026-07-02T13:22:33.055Z",
+      "lastSeenAt": "2026-07-02T13:22:33.055Z"
+    },
+    {
+      "token": "c7b62d17be865fcdfc6a025437adff2117181613ae1d445489db484bbb09f307",
+      "userId": "user_teacher_demo",
+      "createdAt": "2026-07-02T13:31:30.960Z",
+      "lastSeenAt": "2026-07-02T13:31:30.960Z"
+    },
+    {
+      "token": "66571ae1be952527c9a0f4d9110cbc24a7f112301a86a6c3b6450557314c6ffd",
+      "userId": "user_teacher_demo",
+      "createdAt": "2026-07-02T13:31:38.268Z",
+      "lastSeenAt": "2026-07-02T13:31:38.268Z"
+    },
+    {
+      "token": "4cf83d6875b08f1347fac93db2bae25e0cc6a4e5cb5bee67e8e9b2ed2f40be62",
+      "userId": "user_teacher_demo",
+      "createdAt": "2026-07-02T13:32:26.478Z",
+      "lastSeenAt": "2026-07-02T13:32:26.478Z"
+    },
+    {
+      "token": "649afbb79c3e241d5291e29e1e96fcd6381170a6cdbae36a8cea3c7bb2628011",
+      "userId": "user_student_demo",
+      "createdAt": "2026-07-02T13:32:26.528Z",
+      "lastSeenAt": "2026-07-02T13:32:26.528Z"
+    },
+    {
+      "token": "da8f6d36af8c3c9c5af301369674cf70927b0e75f9acaacd613d2ca5d82564b0",
+      "userId": "user_teacher_demo",
+      "createdAt": "2026-07-02T13:32:39.737Z",
+      "lastSeenAt": "2026-07-02T13:32:39.737Z"
+    },
+    {
+      "token": "fef3c747c180d50d6eaaef9e16e6948b1eb2f4eb746d08d9433137d23ad36325",
+      "userId": "user_teacher_demo",
+      "createdAt": "2026-07-02T13:33:46.794Z",
+      "lastSeenAt": "2026-07-02T13:33:46.794Z"
+    },
+    {
+      "token": "5f5e33f360ff0c031429dd3f42701282f1a383aa409fb64521fdadfa34df28fc",
+      "userId": "user_student_demo",
+      "createdAt": "2026-07-02T13:36:29.111Z",
+      "lastSeenAt": "2026-07-02T13:36:29.111Z"
+    },
+    {
+      "token": "d486e9866716f7928421325da3eb2415d847c86d36d18c29d5241ef4bae1d9fd",
+      "userId": "user_student_demo",
+      "createdAt": "2026-07-02T13:45:00.541Z",
+      "lastSeenAt": "2026-07-02T13:45:00.541Z"
+    },
+    {
+      "token": "c49d3d7831c0696c551aaca77769e2f1c3e13cac7597a4d6467a02397a297b1f",
+      "userId": "user_student_demo",
+      "createdAt": "2026-07-02T13:45:14.226Z",
+      "lastSeenAt": "2026-07-02T13:45:14.226Z"
+    },
+    {
+      "token": "0ab7e66d43680b6d5c979805c0f3afa5be880aa2a2af41f1c5c0a94161074ae6",
+      "userId": "user_student_demo",
+      "createdAt": "2026-07-02T13:45:29.165Z",
+      "lastSeenAt": "2026-07-02T13:45:29.165Z"
+    },
+    {
+      "token": "d1821e768e05031b413dbb52cd472b140a935ce6954591bf4bc6b7c58b851ac7",
+      "userId": "user_student_demo",
+      "createdAt": "2026-07-02T14:09:22.942Z",
+      "lastSeenAt": "2026-07-02T14:09:22.942Z"
+    },
+    {
+      "token": "ac740a17792e7702d7dc3cf81091c7140ee1fa4dbcd068e6296808ed42740acc",
+      "userId": "user_student_demo",
+      "createdAt": "2026-07-02T14:10:31.736Z",
+      "lastSeenAt": "2026-07-02T14:10:31.736Z"
+    },
+    {
+      "token": "6a42eda3bc4191948c2c107d36fa4eb24e5f9d1070cdd242182915cf970bcab5",
+      "userId": "user_teacher_demo",
+      "createdAt": "2026-07-02T14:13:40.810Z",
+      "lastSeenAt": "2026-07-02T14:13:40.811Z"
+    },
+    {
+      "token": "d02342b81a34d61efd8ddcf662c324876f859dcf2a0e43c32b22778a7034bb88",
+      "userId": "user_student_demo",
+      "createdAt": "2026-07-02T14:15:08.387Z",
+      "lastSeenAt": "2026-07-02T14:15:08.387Z"
+    },
+    {
+      "token": "b86665c6488c34a9185d6d833bec4e8715f8ad1a73d7b68ba7cb1556dec304ad",
+      "userId": "user_teacher_demo",
+      "createdAt": "2026-07-02T14:15:08.467Z",
+      "lastSeenAt": "2026-07-02T14:15:08.467Z"
+    },
+    {
+      "token": "1c37d94d3ebbea33dbee4a49e497890da760890db076958ad16d6474eaeb126c",
+      "userId": "user_teacher_demo",
+      "createdAt": "2026-07-02T14:44:50.791Z",
+      "lastSeenAt": "2026-07-02T14:44:50.791Z"
+    },
+    {
+      "token": "d1ccca1ff9753f275aa66409f592c04898daeb302f2d26a98f08355fddb9b895",
+      "userId": "user_student_demo",
+      "createdAt": "2026-07-02T14:56:19.776Z",
+      "lastSeenAt": "2026-07-02T14:56:19.776Z"
+    },
+    {
+      "token": "259d80316b44200142ed144a3344d1f225fb79cf4156e50f47e01e667b53962c",
+      "userId": "user_teacher_demo",
+      "createdAt": "2026-07-02T14:56:20.899Z",
+      "lastSeenAt": "2026-07-02T14:56:20.899Z"
+    },
+    {
+      "token": "e70215bdb4c63755ab3369892331d116c7663699ba85f63b0be965ce07055c98",
+      "userId": "user_student_demo",
+      "createdAt": "2026-07-02T15:09:17.845Z",
+      "lastSeenAt": "2026-07-02T15:09:17.845Z"
+    },
+    {
+      "token": "84564a6197e1fca2df4e924ee019f7b3942fdbaf8b140663d6a9e9db12accc8a",
+      "userId": "user_teacher_demo",
+      "createdAt": "2026-07-02T15:13:15.996Z",
+      "lastSeenAt": "2026-07-02T15:13:15.996Z"
+    },
+    {
+      "token": "3b644b56fd8eef053006d448531c50933558c0bc0d3eee6589994eee43fcc619",
+      "userId": "user_teacher_demo",
+      "createdAt": "2026-07-02T15:15:04.144Z",
+      "lastSeenAt": "2026-07-02T15:15:04.144Z"
+    },
+    {
+      "token": "57df582870323bb3e3e5d8556eeae3b38283a1c1b053f191255b7e5d6e836d49",
+      "userId": "user_admin_demo",
+      "createdAt": "2026-07-02T15:45:38.641Z",
+      "lastSeenAt": "2026-07-02T15:45:38.641Z"
+    },
+    {
+      "token": "3ee8205dc22bdb519715dcef5871bbcfc7e5e415af1d37659a8307b6a756058c",
+      "userId": "user_teacher_demo",
+      "createdAt": "2026-07-02T15:45:38.675Z",
+      "lastSeenAt": "2026-07-02T15:45:38.675Z"
+    },
+    {
+      "token": "24e82c86cfb54fdd509c25d1ad9b54f773fe71fd0177b66689837dd8a833fecb",
+      "userId": "user_student_demo",
+      "createdAt": "2026-07-02T15:45:38.709Z",
+      "lastSeenAt": "2026-07-02T15:45:38.710Z"
+    },
+    {
+      "token": "1e08829c1c104d235c34cb074880280177785482c365dfe04451389d01db9b04",
+      "userId": "user_admin_demo",
+      "createdAt": "2026-07-02T15:49:00.396Z",
+      "lastSeenAt": "2026-07-02T15:49:00.396Z"
+    },
+    {
+      "token": "926f4c65159924b82a2022b8f3f1814f2754f0ff3800b8deac23a667bd1fb525",
+      "userId": "user_teacher_demo",
+      "createdAt": "2026-07-02T15:49:00.430Z",
+      "lastSeenAt": "2026-07-02T15:49:00.430Z"
+    },
+    {
+      "token": "f05364d42511a13b8e64d5eb45cad67e25946b81537ed72d808c0b5cc49e2940",
+      "userId": "user_student_demo",
+      "createdAt": "2026-07-02T15:49:00.464Z",
+      "lastSeenAt": "2026-07-02T15:49:00.464Z"
+    },
+    {
+      "token": "05d5bc73100e2a0bb2f87aa1b6aa80d40c706ab6b4c189dba88c74221090081f",
+      "userId": "user_teacher_demo",
+      "createdAt": "2026-07-02T16:11:52.464Z",
+      "lastSeenAt": "2026-07-02T16:11:52.464Z"
+    },
+    {
+      "token": "bed2a17a1df3b6858a35e20b6fd5e2c5caa9269e4390a44929af7e4d962aba91",
+      "userId": "user_admin_demo",
+      "createdAt": "2026-07-02T16:30:18.800Z",
+      "lastSeenAt": "2026-07-02T16:30:18.800Z"
+    },
+    {
+      "token": "4ddd466ff0bee57f2fba93e6848ea973a96195c446d4aafa62310b258c43e0ae",
+      "userId": "user_teacher_demo",
+      "createdAt": "2026-07-02T16:30:18.834Z",
+      "lastSeenAt": "2026-07-02T16:30:18.834Z"
+    },
+    {
+      "token": "424417da5b1e99f726c0ad2c332e2d72956cc838e10483264eacafe15b2cd587",
+      "userId": "user_teacher_repli4c_demo",
+      "createdAt": "2026-07-02T16:30:18.866Z",
+      "lastSeenAt": "2026-07-02T16:30:18.866Z"
+    },
+    {
+      "token": "c742ee6b5d60056b9467842874e2f5ee8995adb648a96ea6faca42ac2861db87",
+      "userId": "user_student_demo",
+      "createdAt": "2026-07-02T16:30:18.899Z",
+      "lastSeenAt": "2026-07-02T16:30:18.899Z"
+    },
+    {
+      "token": "a652c08d57215ea709b9d2986a704753b431dd3e7119363e65e16e5ca786d5ba",
+      "userId": "user_admin_demo",
+      "createdAt": "2026-07-02T16:33:24.050Z",
+      "lastSeenAt": "2026-07-02T16:33:24.051Z"
+    },
+    {
+      "token": "1496ca750ceca7bbef406588fc6eee3a15e9029c844dcdc3507dd8c427a7d3dc",
+      "userId": "user_teacher_demo",
+      "createdAt": "2026-07-02T16:33:24.110Z",
+      "lastSeenAt": "2026-07-02T16:33:24.110Z"
+    },
+    {
+      "token": "90cf8e57cca523d6541a9875ed691567579bf1b45770408eed596c8aa8abd918",
+      "userId": "user_teacher_repli4c_demo",
+      "createdAt": "2026-07-02T16:33:24.143Z",
+      "lastSeenAt": "2026-07-02T16:33:24.143Z"
+    },
+    {
+      "token": "ab6da4eecedd7371944ce5915050559589261d6843f0e2d41d6249d7b194f418",
+      "userId": "user_student_demo",
+      "createdAt": "2026-07-02T16:33:24.176Z",
+      "lastSeenAt": "2026-07-02T16:33:24.176Z"
+    },
+    {
+      "token": "3def660b6a1184d1cda27f71a5a6f3364ced44cebeb6deebea5176de68b536d4",
+      "userId": "user_admin_demo",
+      "createdAt": "2026-07-02T17:42:51.405Z",
+      "lastSeenAt": "2026-07-02T17:42:51.405Z"
+    },
+    {
+      "token": "3c0afef4d0f9e0df88895688a37654e0f9e774081c31864048bc428deb2b1c17",
+      "userId": "user_admin_demo",
+      "createdAt": "2026-07-02T17:51:56.578Z",
+      "lastSeenAt": "2026-07-02T17:51:56.578Z"
+    }
+  ]
+}

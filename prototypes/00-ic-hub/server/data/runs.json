@@ -1,0 +1,141 @@
+{
+  "version": "0.3.1",
+  "updatedAt": "2026-07-02T16:33:24.257Z",
+  "runs": [
+    {
+      "id": "run_041dde51-8516-48d8-be16-ddd6bc3e4eb8",
+      "courseId": "course_463ad673-191d-4c27-ab8f-04ca82e9ae96",
+      "assignmentId": "assign_aa0ffdca-fd12-42c4-8f9a-478269d66242",
+      "prototypeId": "proto06",
+      "activityId": "climateObservations001",
+      "activitySource": "catalog",
+      "studentId": "user_student_demo",
+      "status": "completed",
+      "createdAt": "2026-07-02T15:09:35.712Z",
+      "startedAt": "2026-07-02T15:09:45.798Z",
+      "completedAt": "2026-07-02T15:10:14.372Z",
+      "durationMs": 28574,
+      "launchTokenHash": "e20f5c5c34f053015d04b6faa2efeb79d2fe5fc4873d4d147bc1b4218e762a41",
+      "events": [
+        {
+          "type": "proto_loaded",
+          "at": "2026-07-02T15:09:35.880Z",
+          "payload": {
+            "activityId": "climateObservations001",
+            "activitySource": "catalog",
+            "href": "http://127.0.0.1:8788/index-1.1.2.html?activityId=climateObservations001&activitySource=catalog&courseId=course_463ad673-191d-4c27-ab8f-04ca82e9ae96&assignmentId=assign_aa0ffdca-fd12-42c4-8f9a-478269d66242&runId=run_041dde51-8516-48d8-be16-ddd6bc3e4eb8"
+          }
+        },
+        {
+          "type": "activity_loaded",
+          "at": "2026-07-02T15:09:35.883Z",
+          "payload": {
+            "activityId": "climateObservations001",
+            "activitySource": "catalog",
+            "scenarioId": "globalUnderstanding",
+            "characterCount": 3
+          }
+        },
+        {
+          "type": "proto_loaded",
+          "at": "2026-07-02T15:09:35.885Z",
+          "payload": {
+            "activityId": "climateObservations001",
+            "activitySource": "catalog",
+            "href": "http://127.0.0.1:8788/index-1.1.2.html?activityId=climateObservations001&activitySource=catalog&courseId=course_463ad673-191d-4c27-ab8f-04ca82e9ae96&assignmentId=assign_aa0ffdca-fd12-42c4-8f9a-478269d66242&runId=run_041dde51-8516-48d8-be16-ddd6bc3e4eb8"
+          }
+        },
+        {
+          "type": "activity_loaded",
+          "at": "2026-07-02T15:09:35.887Z",
+          "payload": {
+            "activityId": "climateObservations001",
+            "activitySource": "catalog",
+            "scenarioId": "globalUnderstanding",
+            "characterCount": 3
+          }
+        },
+        {
+          "type": "meeting_started",
+          "at": "2026-07-02T15:09:45.798Z",
+          "payload": {
+            "activityId": "climateObservations001",
+            "activitySource": "catalog"
+          }
+        },
+        {
+          "type": "user_answer_submitted",
+          "at": "2026-07-02T15:10:14.370Z",
+          "payload": {
+            "answerLength": 67,
+            "hasText": true,
+            "timestamp": "2026-07-02T15:10:14.370Z"
+          }
+        },
+        {
+          "type": "activity_completed",
+          "at": "2026-07-02T15:10:14.372Z",
+          "payload": {
+            "activityId": "climateObservations001",
+            "reason": "pedagogical_feedback"
+          }
+        }
+      ]
+    },
+    {
+      "id": "run_5e5c335a-efed-445a-b72f-39d7e60a74f9",
+      "courseId": "course_463ad673-191d-4c27-ab8f-04ca82e9ae96",
+      "assignmentId": "assign_aa0ffdca-fd12-42c4-8f9a-478269d66242",
+      "prototypeId": "proto06",
+      "activityId": "climateObservations001",
+      "activitySource": "catalog",
+      "studentId": "user_student_demo",
+      "status": "launched",
+      "createdAt": "2026-07-02T15:14:34.971Z",
+      "startedAt": null,
+      "completedAt": null,
+      "durationMs": null,
+      "launchTokenHash": "91d452335bab970ae6b6e263fd90cd30a727a0d9d8b4d95b016cc2b3fe1c3f53",
+      "events": [
+        {
+          "type": "proto_loaded",
+          "at": "2026-07-02T15:14:35.101Z",
+          "payload": {
+            "activityId": "climateObservations001",
+            "activitySource": "catalog",
+            "href": "http://127.0.0.1:8788/index-1.1.2.html?activityId=climateObservations001&activitySource=catalog&courseId=course_463ad673-191d-4c27-ab8f-04ca82e9ae96&assignmentId=assign_aa0ffdca-fd12-42c4-8f9a-478269d66242&runId=run_5e5c335a-efed-445a-b72f-39d7e60a74f9"
+          }
+        },
+        {
+          "type": "activity_loaded",
+          "at": "2026-07-02T15:14:35.103Z",
+          "payload": {
+            "activityId": "climateObservations001",
+            "activitySource": "catalog",
+            "scenarioId": "globalUnderstanding",
+            "characterCount": 3
+          }
+        },
+        {
+          "type": "proto_loaded",
+          "at": "2026-07-02T15:14:35.143Z",
+          "payload": {
+            "activityId": "climateObservations001",
+            "activitySource": "catalog",
+            "href": "http://127.0.0.1:8788/index-1.1.2.html?activityId=climateObservations001&activitySource=catalog&courseId=course_463ad673-191d-4c27-ab8f-04ca82e9ae96&assignmentId=assign_aa0ffdca-fd12-42c4-8f9a-478269d66242&runId=run_5e5c335a-efed-445a-b72f-39d7e60a74f9"
+          }
+        },
+        {
+          "type": "activity_loaded",
+          "at": "2026-07-02T15:14:35.151Z",
+          "payload": {
+            "activityId": "climateObservations001",
+            "activitySource": "catalog",
+            "scenarioId": "globalUnderstanding",
+            "characterCount": 3
+          }
+        }
+      ]
+    }
+  ]
+}

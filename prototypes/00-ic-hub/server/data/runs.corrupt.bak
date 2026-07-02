@@ -1,0 +1,50 @@
+{
+  "version": "0.3",
+  "updatedAt": "2026-07-02T14:26:45.507Z",
+  "runs": [
+    {
+      "id": "run_7cb2fcdb-943e-4e14-8275-9c6f651850e2",
+      "courseId": "course_demo_repli4c",
+      "assignmentId": "assign_demo_001",
+      "prototypeId": "proto06",
+      "activityId": "climateObservations001",
+      "activitySource": "catalog",
+      "studentId": "user_student_demo",
+      "status": "created",
+      "createdAt": "2026-07-02T14:26:45.364Z",
+      "startedAt": null,
+      "completedAt": null,
+      "durationMs": null,
+      "launchTokenHash": "5cba44e0594c939b3fdb60bd7fdbeb55f326500952f578bc43a0355095876185",
+      "events": [
+        {
+          "type": "activity_loaded",
+          "at": "2026-07-02T14:26:45.485Z",
+          "payload": {
+            "activityId": "climateObservations001",
+            "activitySource": "catalog",
+            "scenarioId": "globalUnderstanding",
+            "characterCount": 3
+          }
+        },
+        {
+          "type": "activity_loaded",
+          "at": "2026-07-02T14:26:45.507Z",
+          "payload": {
+            "activityId": "climateObservations001",
+            "activitySource": "catalog",
+            "scenarioId": "globalUnderstanding",
+            "characterCount": 3
+          }
+        }
+      ]
+    }
+  ]
+}
+=course_demo_repli4c&assignmentId=assign_demo_001&runId=run_7cb2fcdb-943e-4e14-8275-9c6f651850e2&launchToken=0a63d6fd9b5e89183820db4225251b707767f809a1b06ffa05c7bc7ee0d852c2"
+          }
+        }
+      ]
+    }
+  ]
+}

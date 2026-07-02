@@ -1,0 +1,1652 @@
+const http = require("node:http");
+const fs = require("node:fs/promises");
+const path = require("node:path");
+const crypto = require("node:crypto");
+
+const PORT = Number(process.env.PORT || 8790);
+const VERSION = "0.6";
+const SERVICE = "ic-hub-local";
+const ROOT_DIR = path.resolve(__dirname, "..");
+const PUBLIC_DIR = path.join(ROOT_DIR, "public");
+const DATA_DIR = path.join(__dirname, "data");
+const STORE_MODE = (process.env.IC_HUB_STORE || "json").toLowerCase();
+let mariaDbStore = null;
+let mariaDbAvailable = false;
+
+const stores = {
+  users: "users.json",
+  sessions: "sessions.json",
+  courses: "courses.json",
+  enrollments: "enrollments.json",
+  assignments: "course-activities.json",
+  prototypes: "prototypes.json",
+  runs: "runs.json",
+  institutions: "institutions.json",
+  ownership: "activity-ownership.json",
+  sharingSpaces: "sharing-spaces.json"
+};
+
+const jsonWriteQueues = new Map();
+
+const defaultStores = {
+  users: { users: [] },
+  sessions: { sessions: [] },
+  courses: { courses: [] },
+  enrollments: { enrollments: [] },
+  assignments: { assignments: [] },
+  runs: { version: "0.3.1", updatedAt: "2026-07-02T00:00:00.000Z", runs: [] },
+  institutions: {
+    version: "0.4",
+    institutions: [
+      {
+        id: "inst_uga",
+        name: "Universite Grenoble Alpes",
+        shortName: "UGA",
+        type: "university",
+        country: "France",
+        status: "active",
+        createdAt: "2026-07-02T00:00:00.000Z",
+        updatedAt: "2026-07-02T00:00:00.000Z"
+      },
+      {
+        id: "inst_repli4c",
+        name: "REPLI4C",
+        shortName: "REPLI4C",
+        type: "project",
+        country: "international",
+        status: "active",
+        createdAt: "2026-07-02T00:00:00.000Z",
+        updatedAt: "2026-07-02T00:00:00.000Z"
+      }
+    ]
+  },
+  ownership: {
+    version: "0.4",
+    records: [
+      {
+        id: "own_proto06_climateObservations001_server",
+        prototypeId: "proto06",
+        activityId: "climateObservations001",
+        activitySource: "server",
+        title: "Comprendre des constats climatiques",
+        ownerId: "user_teacher_demo",
+        createdBy: "user_teacher_demo",
+        updatedBy: "user_teacher_demo",
+        institutionId: "inst_uga",
+        visibility: "course",
+        provenance: {
+          kind: "external-prototype",
+          sourcePrototype: "proto06",
+          sourceActivityId: "climateObservations001",
+          importedAt: "2026-07-02T00:00:00.000Z",
+          registeredBy: "user_teacher_demo"
+        },
+        createdAt: "2026-07-02T00:00:00.000Z",
+        updatedAt: "2026-07-02T00:00:00.000Z"
+      }
+    ]
+  },
+  sharingSpaces: {
+    version: "0.5",
+    spaces: [
+      {
+        id: "space_repli4c",
+        name: "REPLI4C",
+        type: "project",
+        institutionId: "inst_repli4c",
+        visibility: "shared",
+        createdAt: "2026-07-02T00:00:00.000Z",
+        updatedAt: "2026-07-02T00:00:00.000Z"
+      },
+      {
+        id: "space_uga",
+        name: "UGA",
+        type: "institution",
+        institutionId: "inst_uga",
+        visibility: "institution",
+        createdAt: "2026-07-02T00:00:00.000Z",
+        updatedAt: "2026-07-02T00:00:00.000Z"
+      }
+    ]
+  },
+  prototypes: {
+    prototypes: [
+      {
+        id: "proto06",
+        title: "Rencontre plurilingue REPLI4C",
+        description: "Composer et lancer des activites d'intercomprehension orale incarnee.",
+        status: "connected-local",
+        entryUrl: "../../06-voice-agent-ic/library-1.1.html",
+        baseUrl: "http://127.0.0.1:8788",
+        libraryUrl: "http://127.0.0.1:8788/library-1.1.html",
+        activityApiUrl: "http://127.0.0.1:8788/api/activities",
+        launchUrl: "http://127.0.0.1:8788/index-1.1.2.html",
+        supportsActivities: true,
+        tags: ["REPLI4C", "oral", "rencontre", "activite"]
+      },
+      {
+        id: "seven-sieves",
+        title: "Seven Sieves",
+        description: "Explorer la comprehension ecrite par tamis d'intercomprehension.",
+        status: "planned",
+        entryUrl: "",
+        tags: ["lecture", "IC", "tamis"]
+      },
+      {
+        id: "dico-ic",
+        title: "Dico-IC",
+        description: "Base de connaissances lexicale et intercomprehension.",
+        status: "planned",
+        entryUrl: "",
+        tags: ["lexique", "API", "ressources"]
+      },
+      {
+        id: "augmented-video",
+        title: "Video augmentee IC",
+        description: "Observer des strategies d'intercomprehension dans une video annotee.",
+        status: "planned",
+        entryUrl: "",
+        tags: ["video", "observation", "strategies"]
+      }
+    ]
+  }
+};
+
+const contentTypes = {
+  ".html": "text/html; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".js": "text/javascript; charset=utf-8",
+  ".json": "application/json; charset=utf-8"
+};
+
+function now() {
+  return new Date().toISOString();
+}
+
+function id(prefix) {
+  return `${prefix}_${crypto.randomUUID()}`;
+}
+
+function hashPassword(password, salt = crypto.randomBytes(16).toString("hex")) {
+  const passwordHash = crypto.scryptSync(password, salt, 64).toString("hex");
+  return { passwordHash, passwordSalt: salt };
+}
+
+function verifyPassword(password, user) {
+  const { passwordHash } = hashPassword(password, user.passwordSalt);
+  const expected = Buffer.from(user.passwordHash || "", "hex");
+  const actual = Buffer.from(passwordHash, "hex");
+  return expected.length === actual.length && crypto.timingSafeEqual(actual, expected);
+}
+
+function hashSessionToken(token) {
+  return crypto.createHash("sha256").update(String(token || "")).digest("hex");
+}
+
+function dataFile(name) {
+  if (!stores[name]) {
+    throw new Error(`Store inconnu: ${name}`);
+  }
+  return path.join(DATA_DIR, stores[name]);
+}
+
+async function ensureStoreFile(name) {
+  await fs.mkdir(DATA_DIR, { recursive: true });
+  const file = dataFile(name);
+  try {
+    await fs.access(file);
+  } catch {
+    await fs.writeFile(file, `${JSON.stringify(defaultStores[name], null, 2)}\n`);
+    console.log(`[startup] created data file ${stores[name]}`);
+  }
+}
+
+function freshDefaultStore(name) {
+  return structuredClone(defaultStores[name]);
+}
+
+async function recoverCorruptJsonStore(name) {
+  await ensureStoreFile(name);
+  const file = dataFile(name);
+  try {
+    JSON.parse(await fs.readFile(file, "utf8"));
+    return false;
+  } catch (error) {
+    const stamp = now().replace(/[:.]/g, "-");
+    const corruptFile = path.join(DATA_DIR, `${path.basename(stores[name], ".json")}.corrupt.${stamp}.json`);
+    console.error(`[startup] ${stores[name]} is corrupt: ${error.message}`);
+    try {
+      await fs.rename(file, corruptFile);
+      console.error(`[startup] corrupt ${stores[name]} saved as ${path.basename(corruptFile)}`);
+    } catch (renameError) {
+      console.error(`[startup] failed to save corrupt ${stores[name]}: ${renameError.message}`);
+    }
+    const cleanStore = freshDefaultStore(name);
+    cleanStore.updatedAt = now();
+    await fs.writeFile(file, `${JSON.stringify(cleanStore, null, 2)}\n`);
+    console.log(`[startup] recreated clean ${stores[name]}`);
+    return true;
+  }
+}
+
+async function readJson(name) {
+  if (STORE_MODE === "mariadb" && mariaDbAvailable && mariaDbStore) {
+    try {
+      return await mariaDbStore.readStore(name);
+    } catch (error) {
+      mariaDbAvailable = false;
+      console.error(`[db] MariaDB read failed for ${name}, falling back to JSON: ${error.message}`);
+    }
+  }
+  await ensureStoreFile(name);
+  const file = dataFile(name);
+  try {
+    const parsed = JSON.parse(await fs.readFile(file, "utf8"));
+    return parsed && typeof parsed === "object" ? parsed : freshDefaultStore(name);
+  } catch (error) {
+    console.error(`[data] failed to read ${stores[name]}: ${error.message}`);
+    throw new Error(`Lecture JSON impossible: ${stores[name]}`);
+  }
+}
+
+async function writeJson(name, data) {
+  if (STORE_MODE === "mariadb" && mariaDbAvailable && mariaDbStore) {
+    try {
+      await mariaDbStore.writeStore(name, data);
+      return;
+    } catch (error) {
+      mariaDbAvailable = false;
+      console.error(`[db] MariaDB write failed for ${name}, falling back to JSON: ${error.message}`);
+    }
+  }
+  await ensureStoreFile(name);
+  const file = dataFile(name);
+  const temp = `${file}.${process.pid}.${Date.now()}.${crypto.randomBytes(4).toString("hex")}.tmp`;
+  try {
+    await fs.writeFile(temp, `${JSON.stringify(data, null, 2)}\n`);
+    await fs.rename(temp, file);
+  } catch (error) {
+    console.error(`[data] failed to write ${stores[name]}: ${error.message}`);
+    throw new Error(`Ecriture JSON impossible: ${stores[name]}`);
+  }
+}
+
+async function withJsonWriteLock(name, task) {
+  const previous = jsonWriteQueues.get(name) || Promise.resolve();
+  let release;
+  const current = new Promise((resolve) => {
+    release = resolve;
+  });
+  const queued = previous.then(() => current, () => current);
+  jsonWriteQueues.set(name, queued);
+  await previous.catch(() => {});
+  try {
+    return await task();
+  } finally {
+    release();
+    if (jsonWriteQueues.get(name) === queued) {
+      jsonWriteQueues.delete(name);
+    }
+  }
+}
+
+function publicUser(user) {
+  if (!user) return null;
+  const { passwordHash, passwordSalt, ...safeUser } = user;
+  return safeUser;
+}
+
+function normalizePrototype(prototype) {
+  if (prototype.id !== "proto06") return prototype;
+  return {
+    ...prototype,
+    status: prototype.status || "connected-local",
+    baseUrl: prototype.baseUrl || "http://127.0.0.1:8788",
+    libraryUrl: prototype.libraryUrl || "http://127.0.0.1:8788/library-1.1.html",
+    activityApiUrl: prototype.activityApiUrl || "http://127.0.0.1:8788/api/activities",
+    launchUrl: prototype.launchUrl || "http://127.0.0.1:8788/index-1.1.2.html",
+    supportsActivities: true
+  };
+}
+
+async function getPrototypesStore() {
+  const store = await readJson("prototypes");
+  store.prototypes = (store.prototypes || []).map(normalizePrototype);
+  return store;
+}
+
+function proto06ActivitySnapshot(activity) {
+  return {
+    title: activity.title || activity.id,
+    pedagogicalGoal: activity.pedagogicalGoal || "",
+    scenarioId: activity.scenarioId || "",
+    characterIds: Array.isArray(activity.characterIds) ? activity.characterIds : []
+  };
+}
+
+const visibilityValues = new Set(["private", "course", "institution", "shared", "public"]);
+
+function normalizeVisibility(value, fallback = "course") {
+  return visibilityValues.has(value) ? value : fallback;
+}
+
+function ownershipIdFor(prototypeId, activityId, activitySource) {
+  return `own_${String(prototypeId).replace(/[^a-z0-9]+/gi, "_")}_${String(activityId).replace(/[^a-z0-9]+/gi, "_")}_${String(activitySource).replace(/[^a-z0-9]+/gi, "_")}`;
+}
+
+async function findUserInstitution(userId) {
+  const usersStore = await readJson("users");
+  return usersStore.users.find((item) => item.id === userId)?.institutionId || null;
+}
+
+async function ensureActivityOwnershipRecord({ assignment, course, user, title }) {
+  return withJsonWriteLock("ownership", async () => {
+    const ownershipStore = await readJson("ownership");
+    ownershipStore.version = "0.4";
+    ownershipStore.records = Array.isArray(ownershipStore.records) ? ownershipStore.records : [];
+    const activitySource = assignment.activitySource || "server";
+    const existing = ownershipStore.records.find((record) =>
+      record.prototypeId === assignment.prototypeId &&
+      record.activityId === assignment.activityId &&
+      record.activitySource === activitySource
+    );
+    if (existing) {
+      return existing;
+    }
+
+    const stamp = now();
+    const institutionId = course?.institutionId || user.institutionId || (await findUserInstitution(user.id));
+    const record = {
+      id: ownershipIdFor(assignment.prototypeId, assignment.activityId, activitySource),
+      prototypeId: assignment.prototypeId,
+      activityId: assignment.activityId,
+      activitySource,
+      title: title || assignment.activityTitle || assignment.activityId,
+      ownerId: user.id,
+      createdBy: user.id,
+      updatedBy: user.id,
+      institutionId: institutionId || null,
+      visibility: "course",
+      provenance: {
+        kind: "external-prototype",
+        sourcePrototype: assignment.prototypeId,
+        sourceActivityId: assignment.activityId,
+        importedAt: stamp,
+        registeredBy: user.id
+      },
+      createdAt: stamp,
+      updatedAt: stamp
+    };
+    ownershipStore.records.push(record);
+    await writeJson("ownership", ownershipStore);
+    console.log(`[ownership] created ${record.id}`);
+    return record;
+  });
+}
+
+function enrichAssignmentWithOwnership(assignment, ownershipStore) {
+  const ownership = (ownershipStore.records || []).find((record) =>
+    record.prototypeId === assignment.prototypeId &&
+    record.activityId === assignment.activityId &&
+    record.activitySource === assignment.activitySource
+  );
+  return ownership ? { ...assignment, ownership } : assignment;
+}
+
+function matchingAssignmentsForOwnership(record, assignments) {
+  return (assignments || []).filter((assignment) =>
+    assignment.prototypeId === record.prototypeId &&
+    assignment.activityId === record.activityId &&
+    assignment.activitySource === record.activitySource
+  );
+}
+
+function canViewActivityOwnership(user, record, context = {}) {
+  if (!user || !record) return { visible: false, reason: "no-user" };
+  if (user.role === "admin") return { visible: true, reason: "admin" };
+  if (record.ownerId === user.id) return { visible: true, reason: "owner" };
+
+  const visibility = normalizeVisibility(record.visibility, "course");
+  const assignments = matchingAssignmentsForOwnership(record, context.assignments || []);
+  const courses = context.courses || [];
+  const enrollments = context.enrollments || [];
+
+  if (visibility === "private") {
+    return { visible: false, reason: "private" };
+  }
+
+  if (visibility === "course") {
+    if (user.role === "teacher") {
+      const teacherCourseIds = new Set(courses.filter((course) => course.teacherId === user.id).map((course) => course.id));
+      if (assignments.some((assignment) => teacherCourseIds.has(assignment.courseId))) {
+        return { visible: true, reason: "course-teacher" };
+      }
+    }
+    if (user.role === "student") {
+      const studentCourseIds = new Set(enrollments.filter((item) => item.userId === user.id).map((item) => item.courseId));
+      if (assignments.some((assignment) => studentCourseIds.has(assignment.courseId))) {
+        return { visible: true, reason: "course-student-assigned" };
+      }
+    }
+    return { visible: false, reason: "course-not-assigned-to-user" };
+  }
+
+  if (visibility === "institution") {
+    if (user.institutionId && record.institutionId && user.institutionId === record.institutionId) {
+      return { visible: true, reason: "same-institution" };
+    }
+    return { visible: false, reason: "different-institution" };
+  }
+
+  if (visibility === "shared") {
+    if (["teacher", "observer"].includes(user.role)) {
+      return { visible: true, reason: "shared-role" };
+    }
+    return { visible: false, reason: "shared-not-for-role" };
+  }
+
+  if (visibility === "public") {
+    return { visible: true, reason: "public" };
+  }
+
+  return { visible: false, reason: "unknown-visibility" };
+}
+
+async function visibleActivityRecordsFor(user) {
+  const [ownershipStore, assignmentsStore, coursesStore, enrollmentsStore] = await Promise.all([
+    readJson("ownership"),
+    readJson("assignments"),
+    readJson("courses"),
+    readJson("enrollments")
+  ]);
+  const context = {
+    assignments: assignmentsStore.assignments || [],
+    courses: coursesStore.courses || [],
+    enrollments: enrollmentsStore.enrollments || []
+  };
+  const records = (ownershipStore.records || []).map((record) => {
+    const access = canViewActivityOwnership(user, record, context);
+    return {
+      ...record,
+      theoreticalVisibility: theoreticalVisibility(record),
+      visibilityReason: access.reason,
+      assignments: matchingAssignmentsForOwnership(record, context.assignments)
+    };
+  });
+  return user.role === "admin" ? records : records.filter((record) => canViewActivityOwnership(user, record, context).visible);
+}
+
+function theoreticalVisibility(record) {
+  const visibility = normalizeVisibility(record.visibility, "course");
+  if (visibility === "private") return "ownerId et admins";
+  if (visibility === "course") return "ownerId, admins, enseignants et etudiants des cours assignes";
+  if (visibility === "institution") return "utilisateurs de la meme institution et admins";
+  if (visibility === "shared") return "enseignants connectes, observateurs et admins";
+  if (visibility === "public") return "tous les utilisateurs connectes";
+  return "regle inconnue";
+}
+
+async function fetchPrototypeActivities(prototypeId) {
+  const store = await getPrototypesStore();
+  const prototype = store.prototypes.find((item) => item.id === prototypeId);
+  if (!prototype) {
+    return {
+      prototypeId,
+      connectorStatus: "not-found",
+      message: "Prototype connector not found.",
+      activities: []
+    };
+  }
+  if (!prototype.supportsActivities || !prototype.activityApiUrl) {
+    return {
+      prototypeId,
+      connectorStatus: "unsupported",
+      message: "Prototype does not expose activities.",
+      activities: []
+    };
+  }
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+    const response = await fetch(prototype.activityApiUrl, { signal: controller.signal });
+    clearTimeout(timeout);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    const payload = await response.json();
+    const rawActivities = Array.isArray(payload) ? payload : payload.activities || [];
+    return {
+      prototypeId,
+      source: "server",
+      connectorStatus: "ok",
+      activities: rawActivities.map((activity) => ({
+        ...activity,
+        prototypeId,
+        source: activity.source || "server"
+      }))
+    };
+  } catch (error) {
+    return {
+      prototypeId,
+      connectorStatus: "unavailable",
+      message: `Prototype 06 backend unavailable on ${prototype.baseUrl || prototype.activityApiUrl}: ${error.message}`,
+      activities: []
+    };
+  }
+}
+
+async function prototypeStatuses() {
+  const store = await getPrototypesStore();
+  const statuses = await Promise.all(store.prototypes.map(async (prototype) => {
+    if (!prototype.supportsActivities) {
+      return { ...prototype, connectorStatus: "unsupported" };
+    }
+    const result = await fetchPrototypeActivities(prototype.id);
+    return {
+      ...prototype,
+      connectorStatus: result.connectorStatus,
+      connectorMessage: result.message || "",
+      activityCount: result.activities.length
+    };
+  }));
+  return { prototypes: statuses };
+}
+
+async function ensureSeedData() {
+  await fs.mkdir(DATA_DIR, { recursive: true });
+  await Promise.all(Object.keys(stores).map(ensureStoreFile));
+  await recoverCorruptJsonStore("runs");
+  console.log(`[startup] data directory ${DATA_DIR}`);
+  console.log(`[startup] data files ${Object.values(stores).join(", ")}`);
+
+  const usersStore = await readJson("users");
+  if (!usersStore.users.length) {
+    const stamp = now();
+    usersStore.users = [
+      {
+        id: "user_admin_demo",
+        displayName: "Admin demo",
+        email: "admin@demo.local",
+        role: "admin",
+        ...hashPassword("admin"),
+        createdAt: stamp,
+        updatedAt: stamp
+      },
+      {
+        id: "user_teacher_demo",
+        displayName: "Enseignant demo",
+        email: "teacher@demo.local",
+        role: "teacher",
+        ...hashPassword("teacher"),
+        createdAt: stamp,
+        updatedAt: stamp
+      },
+      {
+        id: "user_student_demo",
+        displayName: "Etudiant demo",
+        email: "student@demo.local",
+        role: "student",
+        ...hashPassword("student"),
+        createdAt: stamp,
+        updatedAt: stamp
+      },
+      {
+        id: "user_observer_demo",
+        displayName: "Observateur demo",
+        email: "observer@demo.local",
+        role: "observer",
+        ...hashPassword("observer"),
+        createdAt: stamp,
+        updatedAt: stamp
+      }
+    ];
+    await writeJson("users", usersStore);
+  }
+
+  const coursesStore = await readJson("courses");
+  if (!coursesStore.courses.length) {
+    const stamp = now();
+    coursesStore.courses.push({
+      id: "course_demo_repli4c",
+      title: "REPLI4C - groupe demo",
+      teacherId: "user_teacher_demo",
+      description: "Cours demo pour tester les rencontres plurilingues.",
+      accessCode: "REPLI4C-DEMO",
+      level: "M2 / formation",
+      createdAt: stamp,
+      updatedAt: stamp
+    });
+    await writeJson("courses", coursesStore);
+  }
+
+  const enrollmentsStore = await readJson("enrollments");
+  if (!enrollmentsStore.enrollments.some((item) => item.userId === "user_student_demo" && item.courseId === "course_demo_repli4c")) {
+    enrollmentsStore.enrollments.push({
+      userId: "user_student_demo",
+      courseId: "course_demo_repli4c",
+      joinedAt: now()
+    });
+    await writeJson("enrollments", enrollmentsStore);
+  }
+
+  const assignmentsStore = await readJson("assignments");
+  if (!assignmentsStore.assignments.length) {
+    assignmentsStore.assignments.push({
+      id: "assign_demo_001",
+      courseId: "course_demo_repli4c",
+      prototypeId: "proto06",
+      activityId: "climateObservations001",
+      activitySource: "catalog",
+      assignedBy: "user_teacher_demo",
+      createdAt: now()
+    });
+    await writeJson("assignments", assignmentsStore);
+  }
+
+  let usersChanged = false;
+  usersStore.users.forEach((user) => {
+    const nextInstitutionId = user.email === "teacher@demo.local" || user.email === "student@demo.local"
+      ? "inst_uga"
+      : null;
+    if (!Object.prototype.hasOwnProperty.call(user, "institutionId")) {
+      user.institutionId = nextInstitutionId;
+      usersChanged = true;
+    }
+    if (!Object.prototype.hasOwnProperty.call(user, "createdBy")) {
+      user.createdBy = user.role === "admin" ? user.id : "user_admin_demo";
+      usersChanged = true;
+    }
+    if (!Object.prototype.hasOwnProperty.call(user, "updatedBy")) {
+      user.updatedBy = user.createdBy;
+      usersChanged = true;
+    }
+  });
+  if (!usersStore.users.some((user) => user.id === "user_teacher_repli4c_demo")) {
+    const stamp = now();
+    usersStore.users.push({
+      id: "user_teacher_repli4c_demo",
+      displayName: "Enseignant REPLI4C demo",
+      email: "teacher2@demo.local",
+      role: "teacher",
+      institutionId: "inst_repli4c",
+      createdBy: "user_admin_demo",
+      updatedBy: "user_admin_demo",
+      ...hashPassword("teacher2"),
+      createdAt: stamp,
+      updatedAt: stamp
+    });
+    usersChanged = true;
+  }
+  if (usersChanged) {
+    await writeJson("users", usersStore);
+    console.log("[startup] migrated users ownership metadata");
+  }
+
+  let coursesChanged = false;
+  coursesStore.courses.forEach((course) => {
+    const teacher = usersStore.users.find((user) => user.id === course.teacherId);
+    if (!Object.prototype.hasOwnProperty.call(course, "institutionId")) {
+      course.institutionId = teacher?.institutionId || null;
+      coursesChanged = true;
+    }
+    if (!Object.prototype.hasOwnProperty.call(course, "createdBy")) {
+      course.createdBy = course.teacherId || "user_admin_demo";
+      coursesChanged = true;
+    }
+    if (!Object.prototype.hasOwnProperty.call(course, "updatedBy")) {
+      course.updatedBy = course.createdBy;
+      coursesChanged = true;
+    }
+    if (!Object.prototype.hasOwnProperty.call(course, "ownerId")) {
+      course.ownerId = course.teacherId || course.createdBy;
+      coursesChanged = true;
+    }
+    if (!Object.prototype.hasOwnProperty.call(course, "visibility")) {
+      course.visibility = "course";
+      coursesChanged = true;
+    } else {
+      const normalized = normalizeVisibility(course.visibility);
+      if (normalized !== course.visibility) {
+        course.visibility = normalized;
+        coursesChanged = true;
+      }
+    }
+  });
+  if (coursesChanged) {
+    await writeJson("courses", coursesStore);
+    console.log("[startup] migrated courses ownership metadata");
+  }
+
+  let assignmentsChanged = false;
+  assignmentsStore.assignments.forEach((assignment) => {
+    const course = coursesStore.courses.find((item) => item.id === assignment.courseId);
+    const assignedBy = assignment.assignedBy || course?.teacherId || "user_admin_demo";
+    if (!Object.prototype.hasOwnProperty.call(assignment, "createdBy")) {
+      assignment.createdBy = assignedBy;
+      assignmentsChanged = true;
+    }
+    if (!Object.prototype.hasOwnProperty.call(assignment, "updatedBy")) {
+      assignment.updatedBy = assignment.createdBy;
+      assignmentsChanged = true;
+    }
+    if (!Object.prototype.hasOwnProperty.call(assignment, "institutionId")) {
+      assignment.institutionId = course?.institutionId || null;
+      assignmentsChanged = true;
+    }
+    if (!Object.prototype.hasOwnProperty.call(assignment, "visibility")) {
+      assignment.visibility = course?.visibility || "course";
+      assignmentsChanged = true;
+    } else {
+      const normalized = normalizeVisibility(assignment.visibility);
+      if (normalized !== assignment.visibility) {
+        assignment.visibility = normalized;
+        assignmentsChanged = true;
+      }
+    }
+  });
+  if (assignmentsChanged) {
+    await writeJson("assignments", assignmentsStore);
+    console.log("[startup] migrated assignments ownership metadata");
+  }
+
+  for (const assignment of assignmentsStore.assignments) {
+    if (assignment.prototypeId !== "proto06") continue;
+    const course = coursesStore.courses.find((item) => item.id === assignment.courseId);
+    const owner = usersStore.users.find((item) => item.id === (assignment.assignedBy || assignment.createdBy || course?.teacherId));
+    if (course && owner) {
+      await ensureActivityOwnershipRecord({
+        assignment,
+        course,
+        user: owner,
+        title: assignment.activityTitle || assignment.activitySnapshot?.title || assignment.activityId
+      });
+    }
+  }
+
+  const ownershipSeeds = [
+    {
+      id: "own_demo_private_teacher",
+      prototypeId: "proto06",
+      activityId: "demoPrivateTeacher",
+      activitySource: "registry",
+      title: "Activite privee enseignant demo",
+      ownerId: "user_teacher_demo",
+      institutionId: "inst_uga",
+      visibility: "private"
+    },
+    {
+      id: "own_demo_institution_uga",
+      prototypeId: "proto06",
+      activityId: "demoInstitutionUga",
+      activitySource: "registry",
+      title: "Activite institutionnelle UGA",
+      ownerId: "user_admin_demo",
+      institutionId: "inst_uga",
+      visibility: "institution"
+    },
+    {
+      id: "own_demo_shared_repli4c",
+      prototypeId: "proto06",
+      activityId: "demoSharedRepli4c",
+      activitySource: "registry",
+      title: "Activite partagee REPLI4C",
+      ownerId: "user_teacher_demo",
+      institutionId: "inst_repli4c",
+      visibility: "shared"
+    },
+    {
+      id: "own_demo_public",
+      prototypeId: "proto06",
+      activityId: "demoPublic",
+      activitySource: "registry",
+      title: "Activite publique demo",
+      ownerId: "user_teacher_demo",
+      institutionId: null,
+      visibility: "public"
+    }
+  ];
+  await withJsonWriteLock("ownership", async () => {
+    const ownershipStore = await readJson("ownership");
+    ownershipStore.version = "0.5";
+    ownershipStore.records = Array.isArray(ownershipStore.records) ? ownershipStore.records : [];
+    let ownershipChanged = false;
+    for (const seed of ownershipSeeds) {
+      if (ownershipStore.records.some((record) => record.id === seed.id)) continue;
+      const stamp = now();
+      ownershipStore.records.push({
+        ...seed,
+        createdBy: seed.ownerId,
+        updatedBy: seed.ownerId,
+        provenance: {
+          kind: "visibility-demo",
+          sourcePrototype: seed.prototypeId,
+          sourceActivityId: seed.activityId,
+          importedAt: stamp,
+          registeredBy: seed.ownerId
+        },
+        createdAt: stamp,
+        updatedAt: stamp
+      });
+      ownershipChanged = true;
+    }
+    if (ownershipChanged) {
+      await writeJson("ownership", ownershipStore);
+      console.log("[startup] seeded V0.5 visibility ownership records");
+    }
+  });
+}
+
+function sendJson(response, status, body) {
+  if (response.headersSent || response.writableEnded) {
+    console.error(`[http] response already sent, skipped ${status}`);
+    return false;
+  }
+  response.writeHead(status, {
+    "content-type": "application/json; charset=utf-8",
+    "access-control-allow-origin": "*",
+    "access-control-allow-methods": "GET,POST,PUT,DELETE,OPTIONS",
+    "access-control-allow-headers": "content-type, authorization"
+  });
+  response.end(JSON.stringify(body, null, 2));
+  return true;
+}
+
+function readBody(request) {
+  return new Promise((resolve, reject) => {
+    const expectedLength = Number(request.headers["content-length"] || 0);
+    let body = "";
+    let settled = false;
+    const timeout = setTimeout(() => {
+      fail(new Error("Body JSON incomplet ou non termine."));
+    }, 2000);
+
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      try {
+        resolve(body ? JSON.parse(body) : {});
+      } catch {
+        reject(new Error("JSON invalide."));
+      }
+    };
+
+    const fail = (error) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      reject(error);
+    };
+
+    request.setEncoding("utf8");
+    request.on("data", (chunk) => {
+      body += chunk;
+      if (body.length > 1_000_000) {
+        fail(new Error("Payload trop volumineux."));
+        request.destroy();
+        return;
+      }
+      if (expectedLength > 0 && Buffer.byteLength(body) >= expectedLength) {
+        finish();
+      }
+    });
+    request.on("end", finish);
+    request.on("error", fail);
+    request.on("aborted", () => fail(new Error("Requete interrompue.")));
+  });
+}
+
+async function getAuthUser(request) {
+  const auth = request.headers.authorization || "";
+  const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+  if (!token) return null;
+  const [sessionsStore, usersStore] = await Promise.all([readJson("sessions"), readJson("users")]);
+  const hashedToken = hashSessionToken(token);
+  const session = sessionsStore.sessions.find((item) => item.token === token || item.tokenHash === hashedToken);
+  if (!session) return null;
+  const user = usersStore.users.find((item) => item.id === session.userId);
+  return user ? { user, session } : null;
+}
+
+async function requireUser(request, response) {
+  const auth = await getAuthUser(request);
+  if (!auth) {
+    sendJson(response, 401, { error: "Connexion requise." });
+    return null;
+  }
+  return auth.user;
+}
+
+function requireRole(response, user, roles) {
+  if (!roles.includes(user.role)) {
+    sendJson(response, 403, { error: "Acces refuse pour ce role." });
+    return false;
+  }
+  return true;
+}
+
+async function visibleCoursesFor(user) {
+  const [coursesStore, enrollmentsStore] = await Promise.all([readJson("courses"), readJson("enrollments")]);
+  if (user.role === "admin") return coursesStore.courses;
+  if (user.role === "teacher") return coursesStore.courses.filter((course) => course.teacherId === user.id);
+  if (user.role === "student") {
+    const courseIds = enrollmentsStore.enrollments.filter((item) => item.userId === user.id).map((item) => item.courseId);
+    return coursesStore.courses.filter((course) => courseIds.includes(course.id));
+  }
+  return [];
+}
+
+async function canAccessCourse(user, courseId) {
+  return (await visibleCoursesFor(user)).some((course) => course.id === courseId);
+}
+
+async function canManageCourse(user, courseId) {
+  if (user.role === "admin") return true;
+  const coursesStore = await readJson("courses");
+  return user.role === "teacher" && coursesStore.courses.some((course) => course.id === courseId && course.teacherId === user.id);
+}
+
+function hashLaunchToken(token) {
+  return crypto.createHash("sha256").update(String(token || "")).digest("hex");
+}
+
+function buildProto06LaunchUrl(prototype, assignment, runId, launchToken) {
+  const base = prototype.launchUrl || "http://127.0.0.1:8788/index-1.1.2.html";
+  const params = new URLSearchParams({
+    activityId: assignment.activityId,
+    activitySource: assignment.activitySource || "server",
+    courseId: assignment.courseId,
+    assignmentId: assignment.id,
+    runId,
+    launchToken
+  });
+  return `${base}?${params.toString()}`;
+}
+
+function compactRunEventPayload(type, payload = {}) {
+  if (!payload || typeof payload !== "object") {
+    return {};
+  }
+
+  if (type === "user_answer_submitted") {
+    const fallbackText = typeof payload.text === "string" ? payload.text : "";
+    const answerLength = Number.isFinite(Number(payload.answerLength))
+      ? Math.max(0, Number(payload.answerLength))
+      : fallbackText.length;
+    return {
+      answerLength,
+      hasText: Boolean(payload.hasText ?? answerLength > 0),
+      timestamp: now()
+    };
+  }
+
+  const allowedKeys = [
+    "activityId",
+    "activitySource",
+    "scenarioId",
+    "characterCount",
+    "message",
+    "reason",
+    "href"
+  ];
+  return allowedKeys.reduce((safe, key) => {
+    if (payload[key] !== undefined) {
+      if (key === "href" && typeof payload[key] === "string") {
+        try {
+          const safeUrl = new URL(payload[key]);
+          safeUrl.searchParams.delete("launchToken");
+          safe[key] = safeUrl.toString().slice(0, 300);
+        } catch {
+          safe[key] = payload[key].replace(/([?&]launchToken=)[^&]+/i, "$1[redacted]").slice(0, 300);
+        }
+      } else {
+        safe[key] = typeof payload[key] === "string" ? payload[key].slice(0, 300) : payload[key];
+      }
+    }
+    return safe;
+  }, {});
+}
+
+function enrichRuns(runs, usersStore, assignmentsStore) {
+  return runs.map((run) => {
+    const student = usersStore.users.find((item) => item.id === run.studentId);
+    const assignment = assignmentsStore.assignments.find((item) => item.id === run.assignmentId);
+    return {
+      ...run,
+      launchTokenHash: undefined,
+      studentName: student?.displayName || run.studentId,
+      activityTitle: assignment?.activityTitle || assignment?.activitySnapshot?.title || run.activityId,
+      eventCount: Array.isArray(run.events) ? run.events.length : 0
+    };
+  });
+}
+
+async function handleRuns(request, response, url, user) {
+  if (request.method === "POST" && url.pathname === "/api/runs/start") {
+    if (!requireRole(response, user, ["student"])) return;
+    const body = await readBody(request);
+    const courseId = String(body.courseId || "").trim();
+    const assignmentId = String(body.assignmentId || "").trim();
+    if (!courseId || !assignmentId) {
+      return sendJson(response, 400, { error: "courseId et assignmentId sont obligatoires." });
+    }
+    if (!(await canAccessCourse(user, courseId))) {
+      return sendJson(response, 404, { error: "Cours introuvable pour cet etudiant." });
+    }
+
+    const [assignmentsStore, prototypesStore] = await Promise.all([
+      readJson("assignments"),
+      getPrototypesStore()
+    ]);
+    const assignment = assignmentsStore.assignments.find((item) => item.id === assignmentId && item.courseId === courseId);
+    if (!assignment) {
+      return sendJson(response, 404, { error: "Assignation introuvable pour ce cours." });
+    }
+    const prototype = prototypesStore.prototypes.find((item) => item.id === assignment.prototypeId);
+    if (!prototype || assignment.prototypeId !== "proto06") {
+      return sendJson(response, 400, { error: "Cette assignation ne peut pas encore produire de trace de lancement." });
+    }
+
+    return withJsonWriteLock("runs", async () => {
+      const runsStore = await readJson("runs");
+      const runId = id("run");
+      const launchToken = crypto.randomBytes(32).toString("hex");
+      const stamp = now();
+      const launchUrl = buildProto06LaunchUrl(prototype, assignment, runId, launchToken);
+      const run = {
+        id: runId,
+        courseId,
+        assignmentId,
+        prototypeId: assignment.prototypeId,
+        activityId: assignment.activityId,
+        activitySource: assignment.activitySource || "server",
+        studentId: user.id,
+        status: "created",
+        createdAt: stamp,
+        startedAt: null,
+        completedAt: null,
+        durationMs: null,
+        launchTokenHash: hashLaunchToken(launchToken),
+        events: []
+      };
+      runsStore.version = "0.3.1";
+      runsStore.updatedAt = stamp;
+      runsStore.runs = Array.isArray(runsStore.runs) ? runsStore.runs : [];
+      runsStore.runs.push(run);
+      await writeJson("runs", runsStore);
+      console.log(`[runs] start ${runId} student=${user.id} assignment=${assignmentId}`);
+      return sendJson(response, 201, { runId, launchToken, launchUrl });
+    });
+  }
+
+  return false;
+}
+
+async function handleRunEvent(request, response, url) {
+  const match = url.pathname.match(/^\/api\/runs\/([^/]+)\/events$/);
+  if (!match || request.method !== "POST") return false;
+
+  const allowedTypes = new Set([
+    "proto_loaded",
+    "activity_loaded",
+    "meeting_started",
+    "user_answer_submitted",
+    "activity_completed",
+    "error"
+  ]);
+  const runId = decodeURIComponent(match[1]);
+  const body = await readBody(request);
+  const type = String(body.type || "").trim();
+  if (!allowedTypes.has(type)) {
+    return sendJson(response, 400, { error: "Type d'evenement inconnu." });
+  }
+
+  return withJsonWriteLock("runs", async () => {
+    const runsStore = await readJson("runs");
+    runsStore.runs = Array.isArray(runsStore.runs) ? runsStore.runs : [];
+    const run = runsStore.runs.find((item) => item.id === runId);
+    if (!run) {
+      return sendJson(response, 404, { error: "Run introuvable." });
+    }
+    if (run.launchTokenHash !== hashLaunchToken(body.launchToken)) {
+      console.log(`[runs] rejected event ${type} run=${runId} invalid-token`);
+      return sendJson(response, 401, { error: "launchToken invalide." });
+    }
+
+    const stamp = now();
+    const event = {
+      type,
+      at: stamp,
+      payload: compactRunEventPayload(type, body.payload)
+    };
+    run.events = Array.isArray(run.events) ? run.events : [];
+    run.events.push(event);
+    if (type === "proto_loaded" && run.status === "created") {
+      run.status = "launched";
+    }
+    if (type === "meeting_started" && run.status !== "completed") {
+      run.status = "started";
+      run.startedAt = run.startedAt || stamp;
+    }
+    if (type === "activity_completed") {
+      run.status = "completed";
+      run.completedAt = stamp;
+      const startTime = Date.parse(run.startedAt || run.createdAt);
+      run.durationMs = Number.isFinite(startTime) ? Math.max(0, Date.parse(stamp) - startTime) : null;
+    }
+    if (type === "error" && run.status !== "completed") {
+      run.status = "error";
+    }
+    runsStore.version = "0.3.1";
+    runsStore.updatedAt = stamp;
+    await writeJson("runs", runsStore);
+    console.log(`[runs] event ${type} run=${runId}`);
+    return sendJson(response, 200, { ok: true, eventCount: run.events.length, status: run.status });
+  });
+}
+
+async function handleAuth(request, response, url) {
+  if (request.method === "POST" && url.pathname === "/api/auth/login") {
+    const body = await readBody(request);
+    const usersStore = await readJson("users");
+    const email = String(body.email || "").toLowerCase().trim();
+    const user = usersStore.users.find((item) => item.email.toLowerCase() === email);
+    if (!user || !verifyPassword(String(body.password || ""), user)) {
+      console.log(`[auth] login failed ${email || "missing-email"}`);
+      return sendJson(response, 401, { error: "Email ou mot de passe invalide." });
+    }
+    const sessionsStore = await readJson("sessions");
+    const session = {
+      token: crypto.randomBytes(32).toString("hex"),
+      userId: user.id,
+      createdAt: now(),
+      lastSeenAt: now()
+    };
+    sessionsStore.sessions.push(session);
+    await writeJson("sessions", sessionsStore);
+    console.log(`[auth] login ok ${user.email} (${user.role})`);
+    return sendJson(response, 200, { token: session.token, user: publicUser(user) });
+  }
+
+  if (request.method === "POST" && url.pathname === "/api/auth/logout") {
+    const auth = await getAuthUser(request);
+    if (auth) {
+      const sessionsStore = await readJson("sessions");
+      const authHash = auth.session.tokenHash || hashSessionToken(auth.session.token);
+      sessionsStore.sessions = sessionsStore.sessions.filter((item) =>
+        item.token !== auth.session.token && item.tokenHash !== authHash
+      );
+      await writeJson("sessions", sessionsStore);
+    }
+    return sendJson(response, 200, { ok: true });
+  }
+
+  if (request.method === "GET" && url.pathname === "/api/auth/me") {
+    const user = await requireUser(request, response);
+    if (!user) return;
+    return sendJson(response, 200, { user: publicUser(user) });
+  }
+
+  return false;
+}
+
+async function handleCourses(request, response, url, user) {
+  const parts = url.pathname.split("/").filter(Boolean);
+
+  if (request.method === "GET" && url.pathname === "/api/courses") {
+    return sendJson(response, 200, { courses: await visibleCoursesFor(user) });
+  }
+
+  if (request.method === "POST" && url.pathname === "/api/courses") {
+    if (!requireRole(response, user, ["admin", "teacher"])) return;
+    const body = await readBody(request);
+    if (!body.title) return sendJson(response, 400, { error: "title est obligatoire." });
+    const coursesStore = await readJson("courses");
+    const stamp = now();
+    const course = {
+      id: id("course"),
+      title: String(body.title),
+      teacherId: user.role === "admin" && body.teacherId ? String(body.teacherId) : user.id,
+      description: String(body.description || ""),
+      accessCode: String(body.accessCode || `IC-${crypto.randomBytes(3).toString("hex").toUpperCase()}`),
+      level: String(body.level || ""),
+      institutionId: body.institutionId === undefined ? (user.institutionId || null) : (body.institutionId || null),
+      createdBy: user.id,
+      updatedBy: user.id,
+      ownerId: String(body.ownerId || user.id),
+      visibility: normalizeVisibility(body.visibility, "course"),
+      createdAt: stamp,
+      updatedAt: stamp
+    };
+    coursesStore.courses.push(course);
+    await writeJson("courses", coursesStore);
+    return sendJson(response, 201, { course });
+  }
+
+  if (request.method === "POST" && url.pathname === "/api/courses/join") {
+    if (!requireRole(response, user, ["student"])) return;
+    const body = await readBody(request);
+    const coursesStore = await readJson("courses");
+    const course = coursesStore.courses.find((item) => item.accessCode === String(body.accessCode || "").trim());
+    if (!course) return sendJson(response, 404, { error: "Code de cours introuvable." });
+    const enrollmentsStore = await readJson("enrollments");
+    if (!enrollmentsStore.enrollments.some((item) => item.userId === user.id && item.courseId === course.id)) {
+      enrollmentsStore.enrollments.push({ userId: user.id, courseId: course.id, joinedAt: now() });
+      await writeJson("enrollments", enrollmentsStore);
+    }
+    return sendJson(response, 200, { course });
+  }
+
+  const courseId = parts[2];
+  if (parts.length === 3 && parts[0] === "api" && parts[1] === "courses" && courseId) {
+    const coursesStore = await readJson("courses");
+    const course = coursesStore.courses.find((item) => item.id === courseId);
+    if (!course || !(await canAccessCourse(user, courseId))) return sendJson(response, 404, { error: "Cours introuvable." });
+
+    if (request.method === "GET") return sendJson(response, 200, { course });
+
+    if (request.method === "PUT") {
+      if (!(await canManageCourse(user, courseId))) return sendJson(response, 403, { error: "Acces refuse." });
+      const body = await readBody(request);
+      Object.assign(course, {
+        title: body.title ?? course.title,
+        description: body.description ?? course.description,
+        accessCode: body.accessCode ?? course.accessCode,
+        level: body.level ?? course.level,
+        institutionId: body.institutionId === undefined ? course.institutionId : (body.institutionId || null),
+        ownerId: body.ownerId ?? course.ownerId,
+        visibility: body.visibility ? normalizeVisibility(body.visibility, course.visibility || "course") : course.visibility,
+        updatedBy: user.id,
+        updatedAt: now()
+      });
+      await writeJson("courses", coursesStore);
+      return sendJson(response, 200, { course });
+    }
+
+    if (request.method === "DELETE") {
+      if (!(await canManageCourse(user, courseId))) return sendJson(response, 403, { error: "Acces refuse." });
+      coursesStore.courses = coursesStore.courses.filter((item) => item.id !== courseId);
+      await writeJson("courses", coursesStore);
+      return sendJson(response, 200, { ok: true, deletedId: courseId });
+    }
+  }
+
+  if (parts.length >= 4 && parts[0] === "api" && parts[1] === "courses" && parts[3] === "activities") {
+    const courseIdForActivities = parts[2];
+    if (!(await canAccessCourse(user, courseIdForActivities))) return sendJson(response, 404, { error: "Cours introuvable." });
+    const assignmentsStore = await readJson("assignments");
+
+    if (request.method === "GET" && parts.length === 4) {
+      const ownershipStore = await readJson("ownership");
+      return sendJson(response, 200, {
+        assignments: assignmentsStore.assignments
+          .filter((item) => item.courseId === courseIdForActivities)
+          .map((item) => enrichAssignmentWithOwnership(item, ownershipStore))
+      });
+    }
+
+    if (request.method === "POST" && parts.length === 4) {
+      if (!(await canManageCourse(user, courseIdForActivities))) return sendJson(response, 403, { error: "Acces refuse." });
+      const body = await readBody(request);
+      if (!body.prototypeId || !body.activityId || !body.activitySource) {
+        return sendJson(response, 400, { error: "prototypeId, activityId et activitySource sont obligatoires." });
+      }
+      const assignment = {
+        id: id("assign"),
+        courseId: courseIdForActivities,
+        prototypeId: String(body.prototypeId),
+        activityId: String(body.activityId),
+        activitySource: String(body.activitySource),
+        activityTitle: String(body.activityTitle || body.activityId),
+        activitySnapshot: body.activitySnapshot && typeof body.activitySnapshot === "object"
+          ? body.activitySnapshot
+          : null,
+        assignedBy: user.id,
+        createdBy: user.id,
+        updatedBy: user.id,
+        institutionId: (await readJson("courses")).courses.find((course) => course.id === courseIdForActivities)?.institutionId || user.institutionId || null,
+        visibility: normalizeVisibility(body.visibility, "course"),
+        createdAt: now()
+      };
+      assignmentsStore.assignments.push(assignment);
+      await writeJson("assignments", assignmentsStore);
+      const coursesStore = await readJson("courses");
+      const course = coursesStore.courses.find((item) => item.id === courseIdForActivities);
+      const ownership = await ensureActivityOwnershipRecord({
+        assignment,
+        course,
+        user,
+        title: assignment.activityTitle || assignment.activitySnapshot?.title || assignment.activityId
+      });
+      return sendJson(response, 201, { assignment: { ...assignment, ownership } });
+    }
+
+    if (request.method === "DELETE" && parts.length === 5) {
+      if (!(await canManageCourse(user, courseIdForActivities))) return sendJson(response, 403, { error: "Acces refuse." });
+      const assignmentId = parts[4];
+      assignmentsStore.assignments = assignmentsStore.assignments.filter((item) => item.id !== assignmentId);
+      await writeJson("assignments", assignmentsStore);
+      return sendJson(response, 200, { ok: true, deletedId: assignmentId });
+    }
+  }
+
+  if (parts.length === 4 && parts[0] === "api" && parts[1] === "courses" && parts[3] === "runs") {
+    const courseIdForRuns = parts[2];
+    if (request.method !== "GET") return false;
+    if (!(await canAccessCourse(user, courseIdForRuns))) {
+      return sendJson(response, 404, { error: "Cours introuvable." });
+    }
+    const [runsStore, usersStore, assignmentsStore] = await Promise.all([
+      readJson("runs"),
+      readJson("users"),
+      readJson("assignments")
+    ]);
+    let runs = (runsStore.runs || []).filter((run) => run.courseId === courseIdForRuns);
+    if (user.role === "student") {
+      runs = runs.filter((run) => run.studentId === user.id);
+    } else if (!(await canManageCourse(user, courseIdForRuns))) {
+      return sendJson(response, 403, { error: "Acces refuse." });
+    }
+    runs.sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
+    return sendJson(response, 200, { runs: enrichRuns(runs, usersStore, assignmentsStore) });
+  }
+
+  return false;
+}
+
+async function handleInstitutions(request, response, url, user) {
+  const parts = url.pathname.split("/").filter(Boolean);
+  if (parts[0] !== "api" || parts[1] !== "institutions") return false;
+
+  const institutionsStore = await readJson("institutions");
+  institutionsStore.version = "0.4";
+  institutionsStore.institutions = Array.isArray(institutionsStore.institutions) ? institutionsStore.institutions : [];
+
+  if (request.method === "GET" && parts.length === 2) {
+    return sendJson(response, 200, institutionsStore);
+  }
+
+  if (request.method === "GET" && parts.length === 3) {
+    const institution = institutionsStore.institutions.find((item) => item.id === parts[2]);
+    if (!institution) return sendJson(response, 404, { error: "Institution introuvable." });
+    return sendJson(response, 200, { institution });
+  }
+
+  if (request.method === "POST" && parts.length === 2) {
+    if (!requireRole(response, user, ["admin"])) return;
+    const body = await readBody(request);
+    const stamp = now();
+    const institution = {
+      id: String(body.id || id("inst")),
+      name: String(body.name || "").trim(),
+      shortName: String(body.shortName || body.name || "").trim(),
+      type: String(body.type || "organization"),
+      country: String(body.country || ""),
+      status: String(body.status || "active"),
+      createdAt: stamp,
+      updatedAt: stamp
+    };
+    if (!institution.name) return sendJson(response, 400, { error: "name est obligatoire." });
+    if (institutionsStore.institutions.some((item) => item.id === institution.id)) {
+      return sendJson(response, 409, { error: "Institution deja existante." });
+    }
+    institutionsStore.institutions.push(institution);
+    await writeJson("institutions", institutionsStore);
+    return sendJson(response, 201, { institution });
+  }
+
+  if (request.method === "PUT" && parts.length === 3) {
+    if (!requireRole(response, user, ["admin"])) return;
+    const body = await readBody(request);
+    const institution = institutionsStore.institutions.find((item) => item.id === parts[2]);
+    if (!institution) return sendJson(response, 404, { error: "Institution introuvable." });
+    Object.assign(institution, {
+      name: body.name ?? institution.name,
+      shortName: body.shortName ?? institution.shortName,
+      type: body.type ?? institution.type,
+      country: body.country ?? institution.country,
+      status: body.status ?? institution.status,
+      updatedAt: now()
+    });
+    await writeJson("institutions", institutionsStore);
+    return sendJson(response, 200, { institution });
+  }
+
+  return false;
+}
+
+async function handleActivityOwnership(request, response, url, user) {
+  const parts = url.pathname.split("/").filter(Boolean);
+  if (parts[0] !== "api" || parts[1] !== "activity-ownership") return false;
+
+  const ownershipStore = await readJson("ownership");
+  ownershipStore.version = "0.4";
+  ownershipStore.records = Array.isArray(ownershipStore.records) ? ownershipStore.records : [];
+
+  if (request.method === "GET" && parts.length === 2) {
+    const records = user.role === "admin"
+      ? ownershipStore.records.map((record) => ({ ...record, theoreticalVisibility: theoreticalVisibility(record), visibilityReason: "admin" }))
+      : await visibleActivityRecordsFor(user);
+    return sendJson(response, 200, { version: ownershipStore.version, records });
+  }
+
+  if (request.method === "GET" && parts.length === 3) {
+    const record = ownershipStore.records.find((item) => item.id === parts[2]);
+    if (!record) return sendJson(response, 404, { error: "Fiche de paternite introuvable." });
+    const visibleRecords = user.role === "admin"
+      ? ownershipStore.records.map((item) => ({ ...item, theoreticalVisibility: theoreticalVisibility(item), visibilityReason: "admin" }))
+      : await visibleActivityRecordsFor(user);
+    const visibleRecord = visibleRecords.find((item) => item.id === record.id);
+    if (!visibleRecord) return sendJson(response, 403, { error: "Acces refuse." });
+    return sendJson(response, 200, { record: visibleRecord });
+  }
+
+  if (request.method === "PUT" && parts.length === 3) {
+    const body = await readBody(request);
+    return withJsonWriteLock("ownership", async () => {
+      const lockedStore = await readJson("ownership");
+      lockedStore.records = Array.isArray(lockedStore.records) ? lockedStore.records : [];
+      const record = lockedStore.records.find((item) => item.id === parts[2]);
+      if (!record) return sendJson(response, 404, { error: "Fiche de paternite introuvable." });
+      if (user.role !== "admin" && record.ownerId !== user.id) {
+        return sendJson(response, 403, { error: "Acces refuse." });
+      }
+      Object.assign(record, {
+        title: body.title ?? record.title,
+        ownerId: body.ownerId ?? record.ownerId,
+        institutionId: body.institutionId === undefined ? record.institutionId : (body.institutionId || null),
+        visibility: body.visibility ? normalizeVisibility(body.visibility, record.visibility || "course") : record.visibility,
+        notes: body.notes ?? record.notes,
+        updatedBy: user.id,
+        updatedAt: now()
+      });
+      await writeJson("ownership", lockedStore);
+      return sendJson(response, 200, { record });
+    });
+  }
+
+  return false;
+}
+
+async function handleMeActivities(request, response, url, user) {
+  if (request.method !== "GET" || url.pathname !== "/api/me/activities") return false;
+  const records = await visibleActivityRecordsFor(user);
+  return sendJson(response, 200, { activities: records });
+}
+
+async function handleSharingSpaces(request, response, url) {
+  if (request.method !== "GET" || url.pathname !== "/api/sharing-spaces") return false;
+  return sendJson(response, 200, await readJson("sharingSpaces"));
+}
+
+async function handleApi(request, response, url) {
+  if (request.method === "OPTIONS") return sendJson(response, 204, {});
+  if (url.pathname === "/api/health") return sendJson(response, 200, { ok: true, service: SERVICE, version: VERSION });
+
+  const eventHandled = await handleRunEvent(request, response, url);
+  if (eventHandled !== false) return;
+
+  const authResult = await handleAuth(request, response, url);
+  if (authResult !== false) return;
+
+  const user = await requireUser(request, response);
+  if (!user) return;
+
+  if (url.pathname === "/api/prototypes" && request.method === "GET") {
+    return sendJson(response, 200, await getPrototypesStore());
+  }
+
+  if (url.pathname === "/api/prototypes/status" && request.method === "GET") {
+    return sendJson(response, 200, await prototypeStatuses());
+  }
+
+  const prototypeActivitiesMatch = url.pathname.match(/^\/api\/prototypes\/([^/]+)\/activities$/);
+  if (prototypeActivitiesMatch && request.method === "GET") {
+    return sendJson(response, 200, await fetchPrototypeActivities(decodeURIComponent(prototypeActivitiesMatch[1])));
+  }
+
+  if (url.pathname.startsWith("/api/institutions")) {
+    const handled = await handleInstitutions(request, response, url, user);
+    if (handled !== false) return;
+  }
+
+  if (url.pathname.startsWith("/api/activity-ownership")) {
+    const handled = await handleActivityOwnership(request, response, url, user);
+    if (handled !== false) return;
+  }
+
+  if (url.pathname === "/api/me/activities") {
+    const handled = await handleMeActivities(request, response, url, user);
+    if (handled !== false) return;
+  }
+
+  if (url.pathname === "/api/sharing-spaces") {
+    const handled = await handleSharingSpaces(request, response, url, user);
+    if (handled !== false) return;
+  }
+
+  if (url.pathname.startsWith("/api/runs")) {
+    const handled = await handleRuns(request, response, url, user);
+    if (handled !== false) return;
+  }
+
+  if (url.pathname.startsWith("/api/courses")) {
+    const handled = await handleCourses(request, response, url, user);
+    if (handled !== false) return;
+  }
+
+  if (url.pathname === "/api/admin/users" && request.method === "GET") {
+    if (!requireRole(response, user, ["admin"])) return;
+    const usersStore = await readJson("users");
+    return sendJson(response, 200, { users: usersStore.users.map(publicUser) });
+  }
+
+  if (url.pathname === "/api/admin/sessions" && request.method === "GET") {
+    if (!requireRole(response, user, ["admin"])) return;
+    return sendJson(response, 200, await readJson("sessions"));
+  }
+
+  return sendJson(response, 404, { error: "Endpoint introuvable." });
+}
+
+async function serveStatic(response, url) {
+  if (response.headersSent || response.writableEnded) {
+    console.error(`[static] response already sent, skipped ${url.pathname}`);
+    return false;
+  }
+
+  if (url.pathname === "/favicon.ico") {
+    response.writeHead(204);
+    response.end();
+    return true;
+  }
+
+  const redirects = new Map([
+    ["/student.html", "/student-0.6.html"],
+    ["/teacher.html", "/teacher-0.6.html"],
+    ["/hub.html", "/hub-0.6.html"],
+    ["/admin.html", "/admin-0.6.html"]
+  ]);
+  if (redirects.has(url.pathname)) {
+    response.writeHead(302, { location: redirects.get(url.pathname) });
+    response.end();
+    return true;
+  }
+
+  const requested = url.pathname === "/" ? "/login.html" : decodeURIComponent(url.pathname);
+  const target = path.resolve(PUBLIC_DIR, `.${requested}`);
+  if (!target.startsWith(PUBLIC_DIR)) {
+    if (response.headersSent || response.writableEnded) return false;
+    response.writeHead(403);
+    response.end("Forbidden");
+    return true;
+  }
+  try {
+    const extension = path.extname(target).toLowerCase();
+    const file = await fs.readFile(target);
+    if (response.headersSent || response.writableEnded) return false;
+    response.writeHead(200, { "content-type": contentTypes[extension] || "application/octet-stream" });
+    response.end(file);
+    return true;
+  } catch {
+    if (response.headersSent || response.writableEnded) return false;
+    response.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
+    response.end("Not found");
+    return true;
+  }
+}
+
+const server = http.createServer(async (request, response) => {
+  const url = new URL(request.url, `http://${request.headers.host || "localhost"}`);
+  try {
+    if (url.pathname.startsWith("/api/")) {
+      await handleApi(request, response, url);
+      return;
+    }
+    await serveStatic(response, url);
+  } catch (error) {
+    const status = ["JSON invalide.", "Payload trop volumineux."].includes(error.message) ? 400 : 500;
+    console.error(`[server] ${request.method} ${url.pathname} -> ${status}: ${error.stack || error.message}`);
+    sendJson(response, status, { error: error.message || "Erreur serveur." });
+  }
+});
+
+process.on("uncaughtException", (error) => {
+  console.error(`[process] uncaught exception: ${error.stack || error.message}`);
+});
+
+process.on("unhandledRejection", (reason) => {
+  console.error("[process] unhandled rejection:", reason);
+});
+
+async function initStoreMode() {
+  if (STORE_MODE !== "mariadb") {
+    console.log("[startup] store mode json");
+    return;
+  }
+  try {
+    mariaDbStore = require("./stores/mariadbStore");
+    const { testConnection } = require("./db/db");
+    await testConnection();
+    mariaDbAvailable = true;
+    console.log("[startup] store mode mariadb");
+  } catch (error) {
+    mariaDbAvailable = false;
+    console.error(`[startup] MariaDB unavailable, using JSON fallback: ${error.message}`);
+  }
+}
+
+initStoreMode()
+  .then(ensureSeedData)
+  .then(() => {
+    server.listen(PORT, () => {
+      console.log(`${SERVICE} ${VERSION} listening on http://localhost:${PORT}`);
+      console.log(`[startup] public directory ${PUBLIC_DIR}`);
+      console.log(`[startup] active store ${mariaDbAvailable ? "mariadb" : "json"}`);
+    });
+  })
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  });
