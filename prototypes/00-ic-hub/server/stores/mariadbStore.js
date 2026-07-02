@@ -179,6 +179,7 @@ async function readStore(name) {
         updatedBy: row.updated_by,
         institutionId: row.institution_id,
         visibility: row.visibility,
+        aiConfigId: row.ai_config_id,
         createdAt: row.created_at,
         updatedAt: row.updated_at
       }))
@@ -260,6 +261,47 @@ async function readStore(name) {
     };
   }
 
+  if (name === "aiConfigs") {
+    const [configRows] = await pool.query("SELECT * FROM ai_configs ORDER BY prototype_id, status, id");
+    const [linkRows] = await pool.query("SELECT * FROM activity_ai_config ORDER BY created_at, id");
+    return {
+      version: "0.7",
+      configs: configRows.map((row) => ({
+        id: row.id,
+        title: row.title,
+        description: row.description || "",
+        prototypeId: row.prototype_id,
+        mode: row.mode,
+        provider: row.provider,
+        modelId: row.model_id,
+        voiceMode: row.voice_mode,
+        voiceProvider: row.voice_provider,
+        estimatedCostLevel: row.estimated_cost_level,
+        estimatedCostNotes: row.estimated_cost_notes,
+        maxDurationSeconds: row.max_duration_seconds,
+        languagePolicy: row.language_policy,
+        pedagogicalRole: row.pedagogical_role,
+        allowParticipantAgents: Boolean(row.allow_participant_agents),
+        allowTutorAgent: Boolean(row.allow_tutor_agent),
+        allowObserverAgent: Boolean(row.allow_observer_agent),
+        costVisibleToTeacher: Boolean(row.cost_visible_to_teacher),
+        requiresApiKey: Boolean(row.requires_api_key),
+        status: row.status,
+        warnings: parseJson(row.warnings_json, []),
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      })),
+      activityConfigs: linkRows.map((row) => ({
+        id: row.id,
+        activityOwnershipId: row.activity_ownership_id,
+        aiConfigId: row.ai_config_id,
+        assignedBy: row.assigned_by,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }))
+    };
+  }
+
   throw new Error(`Store MariaDB inconnu: ${name}`);
 }
 
@@ -319,7 +361,7 @@ async function createAssignmentWithOwnership({ assignment, course, user, title }
     importedAt: stamp,
     registeredBy: user.id
   };
-  const [sets] = await pool.query("CALL sp_assign_activity_with_ownership(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [
+  const [sets] = await pool.query("CALL sp_assign_activity_with_ownership(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [
     assignment.id,
     assignment.courseId,
     assignment.prototypeId,
@@ -332,6 +374,7 @@ async function createAssignmentWithOwnership({ assignment, course, user, title }
     assignment.updatedBy || user.id,
     assignment.institutionId || course?.institutionId || user.institutionId || null,
     assignment.visibility || course?.visibility || "course",
+    assignment.aiConfigId || null,
     ownershipIdFor(assignment.prototypeId, assignment.activityId, activitySource),
     course?.ownerId || course?.teacherId || user.id,
     json(provenance),
@@ -347,7 +390,7 @@ async function healthSummary() {
   try {
     await connection.query("SELECT 1 AS ok");
     const counts = {};
-    for (const tableName of ["users", "courses", "enrollments", "course_activities", "activity_ownership", "runs", "run_events"]) {
+    for (const tableName of ["users", "courses", "enrollments", "course_activities", "activity_ownership", "ai_configs", "activity_ai_config", "runs", "run_events"]) {
       counts[tableName] = await countRows(connection, tableName);
     }
     const config = require("../db/db").dbConfig();
@@ -448,10 +491,10 @@ async function writeStore(name, store) {
   if (name === "assignments") {
     for (const item of store.assignments || []) {
       await pool.execute(
-        `INSERT INTO course_activities (id, course_id, prototype_id, activity_id, activity_source, activity_title, activity_snapshot_json, assigned_by, created_by, updated_by, institution_id, visibility, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE course_id=VALUES(course_id), prototype_id=VALUES(prototype_id), activity_id=VALUES(activity_id), activity_source=VALUES(activity_source), activity_title=VALUES(activity_title), activity_snapshot_json=VALUES(activity_snapshot_json), assigned_by=VALUES(assigned_by), created_by=VALUES(created_by), updated_by=VALUES(updated_by), institution_id=VALUES(institution_id), visibility=VALUES(visibility), created_at=VALUES(created_at), updated_at=VALUES(updated_at)`,
-        [item.id, item.courseId, item.prototypeId, item.activityId, item.activitySource, item.activityTitle || item.activityId, json(item.activitySnapshot), item.assignedBy || null, item.createdBy || null, item.updatedBy || null, item.institutionId || null, item.visibility || null, item.createdAt || null, item.updatedAt || null]
+        `INSERT INTO course_activities (id, course_id, prototype_id, activity_id, activity_source, activity_title, activity_snapshot_json, assigned_by, created_by, updated_by, institution_id, visibility, ai_config_id, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE course_id=VALUES(course_id), prototype_id=VALUES(prototype_id), activity_id=VALUES(activity_id), activity_source=VALUES(activity_source), activity_title=VALUES(activity_title), activity_snapshot_json=VALUES(activity_snapshot_json), assigned_by=VALUES(assigned_by), created_by=VALUES(created_by), updated_by=VALUES(updated_by), institution_id=VALUES(institution_id), visibility=VALUES(visibility), ai_config_id=VALUES(ai_config_id), created_at=VALUES(created_at), updated_at=VALUES(updated_at)`,
+        [item.id, item.courseId, item.prototypeId, item.activityId, item.activitySource, item.activityTitle || item.activityId, json(item.activitySnapshot), item.assignedBy || null, item.createdBy || null, item.updatedBy || null, item.institutionId || null, item.visibility || null, item.aiConfigId || null, item.createdAt || null, item.updatedAt || null]
       );
     }
     return;
@@ -497,6 +540,26 @@ async function writeStore(name, store) {
           [runEventId(run.id, event, index), run.id, event.type, json(event.payload || {}), event.at || event.createdAt || null]
         );
       }
+    }
+    return;
+  }
+
+  if (name === "aiConfigs") {
+    for (const config of store.configs || []) {
+      await pool.execute(
+        `INSERT INTO ai_configs (id, title, description, prototype_id, mode, provider, model_id, voice_mode, voice_provider, estimated_cost_level, estimated_cost_notes, max_duration_seconds, language_policy, pedagogical_role, allow_participant_agents, allow_tutor_agent, allow_observer_agent, cost_visible_to_teacher, requires_api_key, status, warnings_json, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE title=VALUES(title), description=VALUES(description), prototype_id=VALUES(prototype_id), mode=VALUES(mode), provider=VALUES(provider), model_id=VALUES(model_id), voice_mode=VALUES(voice_mode), voice_provider=VALUES(voice_provider), estimated_cost_level=VALUES(estimated_cost_level), estimated_cost_notes=VALUES(estimated_cost_notes), max_duration_seconds=VALUES(max_duration_seconds), language_policy=VALUES(language_policy), pedagogical_role=VALUES(pedagogical_role), allow_participant_agents=VALUES(allow_participant_agents), allow_tutor_agent=VALUES(allow_tutor_agent), allow_observer_agent=VALUES(allow_observer_agent), cost_visible_to_teacher=VALUES(cost_visible_to_teacher), requires_api_key=VALUES(requires_api_key), status=VALUES(status), warnings_json=VALUES(warnings_json), updated_at=VALUES(updated_at)`,
+        [config.id, config.title, config.description || "", config.prototypeId, config.mode, config.provider || "none", config.modelId || null, config.voiceMode || null, config.voiceProvider || null, config.estimatedCostLevel || null, config.estimatedCostNotes || null, config.maxDurationSeconds ?? null, config.languagePolicy || null, config.pedagogicalRole || null, config.allowParticipantAgents ? 1 : 0, config.allowTutorAgent ? 1 : 0, config.allowObserverAgent ? 1 : 0, config.costVisibleToTeacher === false ? 0 : 1, config.requiresApiKey ? 1 : 0, config.status || "planned", json(config.warnings || []), config.createdAt || null, config.updatedAt || null]
+      );
+    }
+    for (const link of store.activityConfigs || []) {
+      await pool.execute(
+        `INSERT INTO activity_ai_config (id, activity_ownership_id, ai_config_id, assigned_by, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE ai_config_id=VALUES(ai_config_id), assigned_by=VALUES(assigned_by), updated_at=VALUES(updated_at)`,
+        [link.id, link.activityOwnershipId, link.aiConfigId, link.assignedBy || null, link.createdAt || null, link.updatedAt || null]
+      );
     }
     return;
   }

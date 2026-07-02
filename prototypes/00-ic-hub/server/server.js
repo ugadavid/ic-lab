@@ -4,7 +4,7 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 
 const PORT = Number(process.env.PORT || 8790);
-const VERSION = "0.6.2";
+const VERSION = "0.7.1";
 const SERVICE = "ic-hub-local";
 const ROOT_DIR = path.resolve(__dirname, "..");
 const PUBLIC_DIR = path.join(ROOT_DIR, "public");
@@ -24,7 +24,8 @@ const stores = {
   runs: "runs.json",
   institutions: "institutions.json",
   ownership: "activity-ownership.json",
-  sharingSpaces: "sharing-spaces.json"
+  sharingSpaces: "sharing-spaces.json",
+  aiConfigs: "ai-configs.json"
 };
 
 const jsonWriteQueues = new Map();
@@ -110,6 +111,137 @@ const defaultStores = {
       }
     ]
   },
+  aiConfigs: {
+    version: "0.7",
+    configs: [
+      {
+        id: "aicfg_proto06_scripted_browser_voice",
+        title: "Mode scenarise + voix navigateur",
+        description: "Aucune IA generative. Temoignages scenarises et synthese vocale navigateur.",
+        prototypeId: "proto06",
+        mode: "scripted",
+        provider: "none",
+        modelId: null,
+        voiceMode: "browser",
+        voiceProvider: "browser",
+        estimatedCostLevel: "free",
+        estimatedCostNotes: "Aucun cout API.",
+        maxDurationSeconds: 600,
+        languagePolicy: "participant-language-only",
+        pedagogicalRole: "participant",
+        allowParticipantAgents: true,
+        allowTutorAgent: false,
+        allowObserverAgent: false,
+        costVisibleToTeacher: true,
+        requiresApiKey: false,
+        status: "active",
+        warnings: ["Qualite des voix variable selon navigateur et systeme."],
+        createdAt: "2026-07-02T00:00:00.000Z",
+        updatedAt: "2026-07-02T00:00:00.000Z"
+      },
+      {
+        id: "aicfg_proto06_llm_text_browser_voice",
+        title: "IA texte future + voix navigateur",
+        description: "Mode preparatoire pour generation texte future, avec restitution vocale par le navigateur.",
+        prototypeId: "proto06",
+        mode: "llm-text",
+        provider: "future-provider",
+        modelId: null,
+        voiceMode: "browser",
+        voiceProvider: "browser",
+        estimatedCostLevel: "medium",
+        estimatedCostNotes: "Cout dependant du modele texte et du volume de tokens.",
+        maxDurationSeconds: 600,
+        languagePolicy: "participant-language-only",
+        pedagogicalRole: "participant",
+        allowParticipantAgents: true,
+        allowTutorAgent: false,
+        allowObserverAgent: false,
+        costVisibleToTeacher: true,
+        requiresApiKey: true,
+        status: "prototype",
+        warnings: ["Aucun appel IA reel en V0.7.", "Verifier strictement le maintien de chaque agent dans sa langue."],
+        createdAt: "2026-07-02T00:00:00.000Z",
+        updatedAt: "2026-07-02T00:00:00.000Z"
+      },
+      {
+        id: "aicfg_proto06_llm_text_api_voice",
+        title: "IA texte future + voix API",
+        description: "Mode prevu pour combiner generation texte et voix API future.",
+        prototypeId: "proto06",
+        mode: "llm-text-api-voice",
+        provider: "future-provider",
+        modelId: null,
+        voiceMode: "api",
+        voiceProvider: "future-voice-provider",
+        estimatedCostLevel: "high",
+        estimatedCostNotes: "Cout dependant de la duree audio et du modele vocal.",
+        maxDurationSeconds: 480,
+        languagePolicy: "participant-language-only",
+        pedagogicalRole: "participant",
+        allowParticipantAgents: true,
+        allowTutorAgent: false,
+        allowObserverAgent: false,
+        costVisibleToTeacher: true,
+        requiresApiKey: true,
+        status: "planned",
+        warnings: ["Aucune voix API n'est appelee en V0.7.", "Surveiller les couts avant activation."],
+        createdAt: "2026-07-02T00:00:00.000Z",
+        updatedAt: "2026-07-02T00:00:00.000Z"
+      },
+      {
+        id: "aicfg_proto06_realtime_voice_agent",
+        title: "Agent vocal temps reel futur",
+        description: "Mode experimental prevu pour interaction vocale temps reel, avec limite de duree stricte.",
+        prototypeId: "proto06",
+        mode: "realtime-voice",
+        provider: "future-realtime-provider",
+        modelId: null,
+        voiceMode: "realtime",
+        voiceProvider: "future-realtime-provider",
+        estimatedCostLevel: "very-high",
+        estimatedCostNotes: "Mode a limiter strictement dans le temps.",
+        maxDurationSeconds: 300,
+        languagePolicy: "participant-language-only",
+        pedagogicalRole: "participant",
+        allowParticipantAgents: true,
+        allowTutorAgent: false,
+        allowObserverAgent: true,
+        costVisibleToTeacher: true,
+        requiresApiKey: true,
+        status: "experimental",
+        warnings: ["Mode non branche en V0.7.", "Risque de cout eleve et de derives conversationnelles."],
+        createdAt: "2026-07-02T00:00:00.000Z",
+        updatedAt: "2026-07-02T00:00:00.000Z"
+      },
+      {
+        id: "aicfg_proto06_multi_agent_experimental",
+        title: "Multi-agents experimental",
+        description: "Mode de recherche pour plusieurs agents IA futurs, chacun tenu de rester dans sa langue.",
+        prototypeId: "proto06",
+        mode: "multi-agent",
+        provider: "future-provider",
+        modelId: null,
+        voiceMode: "mixed",
+        voiceProvider: "future-provider",
+        estimatedCostLevel: "very-high",
+        estimatedCostNotes: "Cout eleve probable, dependant du nombre d'agents et de la duree.",
+        maxDurationSeconds: 300,
+        languagePolicy: "participant-language-only",
+        pedagogicalRole: "multi-agent",
+        allowParticipantAgents: true,
+        allowTutorAgent: true,
+        allowObserverAgent: true,
+        costVisibleToTeacher: true,
+        requiresApiKey: true,
+        status: "research",
+        warnings: ["Risque pedagogique eleve.", "Aucun agent IA n'est lance en V0.7.", "Chaque agent devra rester dans sa langue."],
+        createdAt: "2026-07-02T00:00:00.000Z",
+        updatedAt: "2026-07-02T00:00:00.000Z"
+      }
+    ],
+    activityConfigs: []
+  },
   prototypes: {
     prototypes: [
       {
@@ -121,7 +253,7 @@ const defaultStores = {
         baseUrl: "http://127.0.0.1:8788",
         libraryUrl: "http://127.0.0.1:8788/library-1.1.html",
         activityApiUrl: "http://127.0.0.1:8788/api/activities",
-        launchUrl: "http://127.0.0.1:8788/index-1.1.2.html",
+        launchUrl: "http://127.0.0.1:8788/index-1.1.3.html",
         supportsActivities: true,
         tags: ["REPLI4C", "oral", "rencontre", "activite"]
       },
@@ -300,6 +432,65 @@ async function storeHealth() {
   }
 }
 
+const aiCostLevels = new Set(["free", "low", "medium", "high", "very-high"]);
+const aiRoles = new Set(["participant", "tutor", "observer", "multi-agent", "none"]);
+const DEFAULT_PROTO06_AI_CONFIG_ID = "aicfg_proto06_scripted_browser_voice";
+
+function normalizeWarnings(value) {
+  if (Array.isArray(value)) return value.map((item) => String(item).trim()).filter(Boolean);
+  if (typeof value === "string") return value.split(/\r?\n/).map((item) => item.trim()).filter(Boolean);
+  return [];
+}
+
+function normalizeAiConfig(input, existing = null) {
+  const stamp = now();
+  const idValue = String(input.id || existing?.id || id("aicfg")).trim();
+  return {
+    id: idValue,
+    title: String(input.title ?? existing?.title ?? idValue).trim(),
+    description: String(input.description ?? existing?.description ?? "").trim(),
+    prototypeId: String(input.prototypeId ?? existing?.prototypeId ?? "proto06").trim(),
+    mode: String(input.mode ?? existing?.mode ?? "scripted").trim(),
+    provider: String(input.provider ?? existing?.provider ?? "none").trim(),
+    modelId: input.modelId === undefined ? (existing?.modelId ?? null) : (input.modelId ? String(input.modelId).trim() : null),
+    voiceMode: String(input.voiceMode ?? existing?.voiceMode ?? "none").trim(),
+    voiceProvider: String(input.voiceProvider ?? existing?.voiceProvider ?? "none").trim(),
+    estimatedCostLevel: aiCostLevels.has(input.estimatedCostLevel) ? input.estimatedCostLevel : (existing?.estimatedCostLevel || "free"),
+    estimatedCostNotes: String(input.estimatedCostNotes ?? existing?.estimatedCostNotes ?? "").trim(),
+    maxDurationSeconds: Number.isFinite(Number(input.maxDurationSeconds ?? existing?.maxDurationSeconds))
+      ? Math.max(0, Math.round(Number(input.maxDurationSeconds ?? existing?.maxDurationSeconds)))
+      : null,
+    languagePolicy: String(input.languagePolicy ?? existing?.languagePolicy ?? "participant-language-only").trim(),
+    pedagogicalRole: aiRoles.has(input.pedagogicalRole) ? input.pedagogicalRole : (existing?.pedagogicalRole || "none"),
+    allowParticipantAgents: Boolean(input.allowParticipantAgents ?? existing?.allowParticipantAgents ?? false),
+    allowTutorAgent: Boolean(input.allowTutorAgent ?? existing?.allowTutorAgent ?? false),
+    allowObserverAgent: Boolean(input.allowObserverAgent ?? existing?.allowObserverAgent ?? false),
+    costVisibleToTeacher: Boolean(input.costVisibleToTeacher ?? existing?.costVisibleToTeacher ?? true),
+    requiresApiKey: Boolean(input.requiresApiKey ?? existing?.requiresApiKey ?? false),
+    status: String(input.status ?? existing?.status ?? "planned").trim(),
+    warnings: normalizeWarnings(input.warnings ?? existing?.warnings ?? []),
+    createdAt: existing?.createdAt || input.createdAt || stamp,
+    updatedAt: stamp
+  };
+}
+
+async function aiConfigForAssignment(assignment) {
+  const store = await readJson("aiConfigs");
+  const configs = Array.isArray(store.configs) ? store.configs : [];
+  const configId = assignment.aiConfigId || (assignment.prototypeId === "proto06" ? DEFAULT_PROTO06_AI_CONFIG_ID : null);
+  return configs.find((config) => config.id === configId) || null;
+}
+
+async function enrichAssignmentsWithAiConfig(assignments) {
+  const store = await readJson("aiConfigs");
+  const configs = Array.isArray(store.configs) ? store.configs : [];
+  return assignments.map((assignment) => {
+    const aiConfigId = assignment.aiConfigId || (assignment.prototypeId === "proto06" ? DEFAULT_PROTO06_AI_CONFIG_ID : null);
+    const aiConfig = configs.find((config) => config.id === aiConfigId) || null;
+    return { ...assignment, aiConfigId, aiConfig };
+  });
+}
+
 async function withJsonWriteLock(name, task) {
   const previous = jsonWriteQueues.get(name) || Promise.resolve();
   let release;
@@ -333,7 +524,7 @@ function normalizePrototype(prototype) {
     baseUrl: prototype.baseUrl || "http://127.0.0.1:8788",
     libraryUrl: prototype.libraryUrl || "http://127.0.0.1:8788/library-1.1.html",
     activityApiUrl: prototype.activityApiUrl || "http://127.0.0.1:8788/api/activities",
-    launchUrl: prototype.launchUrl || "http://127.0.0.1:8788/index-1.1.2.html",
+    launchUrl: prototype.launchUrl || "http://127.0.0.1:8788/index-1.1.3.html",
     supportsActivities: true
   };
 }
@@ -482,14 +673,24 @@ function canViewActivityOwnership(user, record, context = {}) {
 }
 
 async function visibleActivityRecordsFor(user) {
-  const [ownershipStore, assignmentsStore, coursesStore, enrollmentsStore] = await Promise.all([
+  const [ownershipStore, assignmentsStore, coursesStore, enrollmentsStore, aiConfigsStore] = await Promise.all([
     readJson("ownership"),
     readJson("assignments"),
     readJson("courses"),
-    readJson("enrollments")
+    readJson("enrollments"),
+    readJson("aiConfigs")
   ]);
+  const aiConfigs = aiConfigsStore.configs || [];
+  const assignmentsWithAiConfig = (assignmentsStore.assignments || []).map((assignment) => {
+    const aiConfigId = assignment.aiConfigId || (assignment.prototypeId === "proto06" ? DEFAULT_PROTO06_AI_CONFIG_ID : null);
+    return {
+      ...assignment,
+      aiConfigId,
+      aiConfig: aiConfigs.find((config) => config.id === aiConfigId) || null
+    };
+  });
   const context = {
-    assignments: assignmentsStore.assignments || [],
+    assignments: assignmentsWithAiConfig,
     courses: coursesStore.courses || [],
     enrollments: enrollmentsStore.enrollments || []
   };
@@ -773,6 +974,10 @@ async function ensureSeedData() {
         assignmentsChanged = true;
       }
     }
+    if (assignment.prototypeId === "proto06" && !assignment.aiConfigId) {
+      assignment.aiConfigId = DEFAULT_PROTO06_AI_CONFIG_ID;
+      assignmentsChanged = true;
+    }
   });
   if (assignmentsChanged) {
     await writeJson("assignments", assignmentsStore);
@@ -981,7 +1186,8 @@ function hashLaunchToken(token) {
 }
 
 function buildProto06LaunchUrl(prototype, assignment, runId, launchToken) {
-  const base = prototype.launchUrl || "http://127.0.0.1:8788/index-1.1.2.html";
+  const base = prototype.launchUrl || "http://127.0.0.1:8788/index-1.1.3.html";
+  const aiConfigId = assignment.aiConfigId || DEFAULT_PROTO06_AI_CONFIG_ID;
   const params = new URLSearchParams({
     activityId: assignment.activityId,
     activitySource: assignment.activitySource || "server",
@@ -990,6 +1196,7 @@ function buildProto06LaunchUrl(prototype, assignment, runId, launchToken) {
     runId,
     launchToken
   });
+  if (aiConfigId) params.set("aiConfigId", aiConfigId);
   return `${base}?${params.toString()}`;
 }
 
@@ -1351,10 +1558,12 @@ async function handleCourses(request, response, url, user) {
 
     if (request.method === "GET" && parts.length === 4) {
       const ownershipStore = await readJson("ownership");
+      const courseAssignments = assignmentsStore.assignments
+        .filter((item) => item.courseId === courseIdForActivities)
+        .map((item) => enrichAssignmentWithOwnership(item, ownershipStore));
+      const enrichedAssignments = await enrichAssignmentsWithAiConfig(courseAssignments);
       return sendJson(response, 200, {
-        assignments: assignmentsStore.assignments
-          .filter((item) => item.courseId === courseIdForActivities)
-          .map((item) => enrichAssignmentWithOwnership(item, ownershipStore))
+        assignments: enrichedAssignments
       });
     }
 
@@ -1366,6 +1575,14 @@ async function handleCourses(request, response, url, user) {
       }
       const coursesStore = await readJson("courses");
       const course = coursesStore.courses.find((item) => item.id === courseIdForActivities);
+      const requestedAiConfigId = body.aiConfigId ? String(body.aiConfigId) : "";
+      const aiConfigsStore = await readJson("aiConfigs");
+      const prototypeAiConfigs = (aiConfigsStore.configs || []).filter((config) => config.prototypeId === String(body.prototypeId));
+      const fallbackAiConfigId = String(body.prototypeId) === "proto06" ? DEFAULT_PROTO06_AI_CONFIG_ID : null;
+      const aiConfigId = requestedAiConfigId || fallbackAiConfigId;
+      if (aiConfigId && !prototypeAiConfigs.some((config) => config.id === aiConfigId)) {
+        return sendJson(response, 400, { error: "Configuration IA introuvable pour ce prototype." });
+      }
       const assignment = {
         id: id("assign"),
         courseId: courseIdForActivities,
@@ -1381,6 +1598,7 @@ async function handleCourses(request, response, url, user) {
         updatedBy: user.id,
         institutionId: course?.institutionId || user.institutionId || null,
         visibility: normalizeVisibility(body.visibility, "course"),
+        aiConfigId,
         createdAt: now(),
         updatedAt: now()
       };
@@ -1391,7 +1609,8 @@ async function handleCourses(request, response, url, user) {
           user,
           title: assignment.activityTitle || assignment.activitySnapshot?.title || assignment.activityId
         });
-        return sendJson(response, 201, { assignment: { ...assignment, ownership } });
+        const aiConfig = await aiConfigForAssignment(assignment);
+        return sendJson(response, 201, { assignment: { ...assignment, ownership, aiConfig } });
       }
       assignmentsStore.assignments.push(assignment);
       await writeJson("assignments", assignmentsStore);
@@ -1401,7 +1620,8 @@ async function handleCourses(request, response, url, user) {
         user,
         title: assignment.activityTitle || assignment.activitySnapshot?.title || assignment.activityId
       });
-      return sendJson(response, 201, { assignment: { ...assignment, ownership } });
+      const aiConfig = await aiConfigForAssignment(assignment);
+      return sendJson(response, 201, { assignment: { ...assignment, ownership, aiConfig } });
     }
 
     if (request.method === "DELETE" && parts.length === 5) {
@@ -1562,6 +1782,124 @@ async function handleSharingSpaces(request, response, url) {
   return sendJson(response, 200, await readJson("sharingSpaces"));
 }
 
+async function handleAiConfigs(request, response, url, user) {
+  const parts = url.pathname.split("/").filter(Boolean);
+  const canSeeAll = ["admin", "teacher"].includes(user.role);
+  const store = await readJson("aiConfigs");
+  store.version = "0.7";
+  store.configs = Array.isArray(store.configs) ? store.configs : [];
+  store.activityConfigs = Array.isArray(store.activityConfigs) ? store.activityConfigs : [];
+
+  if (request.method === "GET" && url.pathname === "/api/ai-configs") {
+    const configs = canSeeAll ? store.configs : store.configs.filter((config) => config.status === "active");
+    return sendJson(response, 200, { version: store.version, configs });
+  }
+
+  if (request.method === "GET" && parts.length === 3 && parts[0] === "api" && parts[1] === "ai-configs") {
+    const config = store.configs.find((item) => item.id === decodeURIComponent(parts[2]));
+    if (!config || (!canSeeAll && config.status !== "active")) {
+      return sendJson(response, 404, { error: "Configuration IA introuvable." });
+    }
+    return sendJson(response, 200, { config });
+  }
+
+  if (request.method === "POST" && url.pathname === "/api/ai-configs") {
+    if (!requireRole(response, user, ["admin"])) return;
+    const body = await readBody(request);
+    return withJsonWriteLock("aiConfigs", async () => {
+      const lockedStore = await readJson("aiConfigs");
+      lockedStore.version = "0.7";
+      lockedStore.configs = Array.isArray(lockedStore.configs) ? lockedStore.configs : [];
+      const config = normalizeAiConfig(body);
+      if (lockedStore.configs.some((item) => item.id === config.id)) {
+        return sendJson(response, 409, { error: "Configuration IA deja existante." });
+      }
+      lockedStore.configs.push(config);
+      lockedStore.activityConfigs = Array.isArray(lockedStore.activityConfigs) ? lockedStore.activityConfigs : [];
+      await writeJson("aiConfigs", lockedStore);
+      return sendJson(response, 201, { config });
+    });
+  }
+
+  if (request.method === "PUT" && parts.length === 3 && parts[0] === "api" && parts[1] === "ai-configs") {
+    if (!requireRole(response, user, ["admin"])) return;
+    const configId = decodeURIComponent(parts[2]);
+    const body = await readBody(request);
+    return withJsonWriteLock("aiConfigs", async () => {
+      const lockedStore = await readJson("aiConfigs");
+      lockedStore.version = "0.7";
+      lockedStore.configs = Array.isArray(lockedStore.configs) ? lockedStore.configs : [];
+      const index = lockedStore.configs.findIndex((item) => item.id === configId);
+      if (index === -1) return sendJson(response, 404, { error: "Configuration IA introuvable." });
+      const config = normalizeAiConfig({ ...body, id: configId }, lockedStore.configs[index]);
+      lockedStore.configs[index] = config;
+      lockedStore.activityConfigs = Array.isArray(lockedStore.activityConfigs) ? lockedStore.activityConfigs : [];
+      await writeJson("aiConfigs", lockedStore);
+      return sendJson(response, 200, { config });
+    });
+  }
+
+  if (request.method === "GET" && parts.length === 4 && parts[0] === "api" && parts[1] === "prototypes" && parts[3] === "ai-configs") {
+    const prototypeId = decodeURIComponent(parts[2]);
+    const configs = store.configs.filter((config) =>
+      config.prototypeId === prototypeId && (canSeeAll || config.status === "active")
+    );
+    return sendJson(response, 200, { prototypeId, configs });
+  }
+
+  return false;
+}
+
+async function handleCourseActivityAiConfig(request, response, url, user) {
+  const match = url.pathname.match(/^\/api\/course-activities\/([^/]+)\/ai-config$/);
+  if (!match) return false;
+  const assignmentId = decodeURIComponent(match[1]);
+  const assignmentsStore = await readJson("assignments");
+  const assignments = Array.isArray(assignmentsStore.assignments) ? assignmentsStore.assignments : [];
+  const assignment = assignments.find((item) => item.id === assignmentId);
+  if (!assignment) return sendJson(response, 404, { error: "Assignation introuvable." });
+  if (!(await canAccessCourse(user, assignment.courseId))) {
+    return sendJson(response, 404, { error: "Assignation introuvable." });
+  }
+
+  if (request.method === "GET") {
+    const aiConfig = await aiConfigForAssignment(assignment);
+    return sendJson(response, 200, {
+      assignmentId,
+      aiConfigId: assignment.aiConfigId || (assignment.prototypeId === "proto06" ? DEFAULT_PROTO06_AI_CONFIG_ID : null),
+      aiConfig
+    });
+  }
+
+  if (request.method === "PUT") {
+    if (!(await canManageCourse(user, assignment.courseId))) {
+      return sendJson(response, 403, { error: "Acces refuse." });
+    }
+    const body = await readBody(request);
+    const nextAiConfigId = String(body.aiConfigId || "").trim();
+    const aiConfigsStore = await readJson("aiConfigs");
+    const config = (aiConfigsStore.configs || []).find((item) =>
+      item.id === nextAiConfigId && item.prototypeId === assignment.prototypeId
+    );
+    if (!config) return sendJson(response, 400, { error: "Configuration IA introuvable pour ce prototype." });
+    return withJsonWriteLock("assignments", async () => {
+      const lockedStore = await readJson("assignments");
+      lockedStore.assignments = Array.isArray(lockedStore.assignments) ? lockedStore.assignments : [];
+      const lockedAssignment = lockedStore.assignments.find((item) => item.id === assignmentId);
+      if (!lockedAssignment) return sendJson(response, 404, { error: "Assignation introuvable." });
+      lockedAssignment.aiConfigId = nextAiConfigId;
+      lockedAssignment.updatedBy = user.id;
+      lockedAssignment.updatedAt = now();
+      await writeJson("assignments", lockedStore);
+      return sendJson(response, 200, {
+        assignment: { ...lockedAssignment, aiConfig: config }
+      });
+    });
+  }
+
+  return false;
+}
+
 async function handleApi(request, response, url) {
   if (request.method === "OPTIONS") return sendJson(response, 204, {});
   if (url.pathname === "/api/health" || url.pathname === "/api/health/db") {
@@ -1610,6 +1948,16 @@ async function handleApi(request, response, url) {
     if (handled !== false) return;
   }
 
+  if (url.pathname.startsWith("/api/ai-configs") || /^\/api\/prototypes\/[^/]+\/ai-configs$/.test(url.pathname)) {
+    const handled = await handleAiConfigs(request, response, url, user);
+    if (handled !== false) return;
+  }
+
+  if (url.pathname.startsWith("/api/course-activities/")) {
+    const handled = await handleCourseActivityAiConfig(request, response, url, user);
+    if (handled !== false) return;
+  }
+
   if (url.pathname.startsWith("/api/runs")) {
     const handled = await handleRuns(request, response, url, user);
     if (handled !== false) return;
@@ -1647,10 +1995,10 @@ async function serveStatic(response, url) {
   }
 
   const redirects = new Map([
-    ["/student.html", "/student-0.6.1.html"],
-    ["/teacher.html", "/teacher-0.6.1.html"],
-    ["/hub.html", "/hub-0.6.1.html"],
-    ["/admin.html", "/admin-0.6.1.html"]
+    ["/student.html", "/student-0.7.1.html"],
+    ["/teacher.html", "/teacher-0.7.1.html"],
+    ["/hub.html", "/hub-0.7.1.html"],
+    ["/admin.html", "/admin-0.7.1.html"]
   ]);
   if (redirects.has(url.pathname)) {
     response.writeHead(302, { location: redirects.get(url.pathname) });

@@ -26,6 +26,8 @@ async function main() {
       enrollments: await scalar(connection, "SELECT COUNT(*) AS count FROM enrollments"),
       assignments: await scalar(connection, "SELECT COUNT(*) AS count FROM course_activities"),
       ownership: await scalar(connection, "SELECT COUNT(*) AS count FROM activity_ownership"),
+      aiConfigs: await scalar(connection, "SELECT COUNT(*) AS count FROM ai_configs"),
+      activityAiConfigs: await scalar(connection, "SELECT COUNT(*) AS count FROM activity_ai_config"),
       runs: await scalar(connection, "SELECT COUNT(*) AS count FROM runs"),
       runEvents: await scalar(connection, "SELECT COUNT(*) AS count FROM run_events")
     };
@@ -114,6 +116,8 @@ async function main() {
     console.log(`Enrollments: ${counts.enrollments}`);
     console.log(`Assignments: ${counts.assignments}`);
     console.log(`Ownership records: ${counts.ownership}`);
+    console.log(`AI configs: ${counts.aiConfigs}`);
+    console.log(`Activity AI config links: ${counts.activityAiConfigs}`);
     console.log(`Runs: ${counts.runs}`);
     console.log(`Run events: ${counts.runEvents}`);
     for (const item of issues) {

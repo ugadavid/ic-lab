@@ -98,11 +98,17 @@ CREATE TABLE IF NOT EXISTS course_activities (
   updated_by VARCHAR(128) NULL,
   institution_id VARCHAR(128) NULL,
   visibility VARCHAR(64) NULL,
+  ai_config_id VARCHAR(128) NULL,
   created_at VARCHAR(40) NULL,
   updated_at VARCHAR(40) NULL,
   KEY idx_course_activities_course (course_id),
-  KEY idx_course_activities_proto_activity (prototype_id, activity_id, activity_source)
+  KEY idx_course_activities_proto_activity (prototype_id, activity_id, activity_source),
+  KEY idx_course_activities_ai_config (ai_config_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE course_activities
+  ADD COLUMN IF NOT EXISTS ai_config_id VARCHAR(128) NULL,
+  ADD KEY IF NOT EXISTS idx_course_activities_ai_config (ai_config_id);
 
 CREATE TABLE IF NOT EXISTS activity_ownership (
   id VARCHAR(128) NOT NULL PRIMARY KEY,
@@ -164,4 +170,45 @@ CREATE TABLE IF NOT EXISTS run_events (
   created_at VARCHAR(40) NULL,
   KEY idx_run_events_run (run_id),
   KEY idx_run_events_type (type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS ai_configs (
+  id VARCHAR(128) NOT NULL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description TEXT NULL,
+  prototype_id VARCHAR(128) NOT NULL,
+  mode VARCHAR(128) NOT NULL,
+  provider VARCHAR(128) NOT NULL,
+  model_id VARCHAR(255) NULL,
+  voice_mode VARCHAR(128) NULL,
+  voice_provider VARCHAR(128) NULL,
+  estimated_cost_level VARCHAR(64) NULL,
+  estimated_cost_notes TEXT NULL,
+  max_duration_seconds INT NULL,
+  language_policy VARCHAR(128) NULL,
+  pedagogical_role VARCHAR(128) NULL,
+  allow_participant_agents TINYINT(1) NOT NULL DEFAULT 0,
+  allow_tutor_agent TINYINT(1) NOT NULL DEFAULT 0,
+  allow_observer_agent TINYINT(1) NOT NULL DEFAULT 0,
+  cost_visible_to_teacher TINYINT(1) NOT NULL DEFAULT 1,
+  requires_api_key TINYINT(1) NOT NULL DEFAULT 0,
+  status VARCHAR(64) NOT NULL,
+  warnings_json LONGTEXT NULL,
+  created_at VARCHAR(40) NULL,
+  updated_at VARCHAR(40) NULL,
+  KEY idx_ai_configs_prototype (prototype_id),
+  KEY idx_ai_configs_status (status),
+  KEY idx_ai_configs_mode (mode)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS activity_ai_config (
+  id VARCHAR(128) NOT NULL PRIMARY KEY,
+  activity_ownership_id VARCHAR(128) NOT NULL,
+  ai_config_id VARCHAR(128) NOT NULL,
+  assigned_by VARCHAR(128) NULL,
+  created_at VARCHAR(40) NULL,
+  updated_at VARCHAR(40) NULL,
+  UNIQUE KEY uq_activity_ai_config_owner_config (activity_ownership_id, ai_config_id),
+  KEY idx_activity_ai_config_owner (activity_ownership_id),
+  KEY idx_activity_ai_config_config (ai_config_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

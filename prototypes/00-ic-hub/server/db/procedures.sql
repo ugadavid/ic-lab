@@ -174,6 +174,7 @@ CREATE PROCEDURE sp_assign_activity_with_ownership(
   IN p_updated_by VARCHAR(128),
   IN p_institution_id VARCHAR(128),
   IN p_visibility VARCHAR(64),
+  IN p_ai_config_id VARCHAR(128),
   IN p_ownership_id VARCHAR(128),
   IN p_owner_id VARCHAR(128),
   IN p_provenance_json LONGTEXT,
@@ -220,6 +221,7 @@ BEGIN
     updated_by,
     institution_id,
     visibility,
+    ai_config_id,
     created_at,
     updated_at
   )
@@ -236,6 +238,7 @@ BEGIN
     p_updated_by,
     p_institution_id,
     p_visibility,
+    p_ai_config_id,
     p_created_at,
     p_created_at
   );

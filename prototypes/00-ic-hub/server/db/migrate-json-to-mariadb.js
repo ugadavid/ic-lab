@@ -6,6 +6,7 @@ const mariaDbStore = require("../stores/mariadbStore");
 const SERVER_DIR = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(SERVER_DIR, "data");
 const dryRun = process.argv.includes("--dry-run");
+const DEFAULT_PROTO06_AI_CONFIG_ID = "aicfg_proto06_scripted_browser_voice";
 
 const files = {
   users: "users.json",
@@ -17,7 +18,8 @@ const files = {
   runs: "runs.json",
   institutions: "institutions.json",
   ownership: "activity-ownership.json",
-  sharingSpaces: "sharing-spaces.json"
+  sharingSpaces: "sharing-spaces.json",
+  aiConfigs: "ai-configs.json"
 };
 
 async function readJsonStore(name) {
@@ -36,6 +38,7 @@ async function readJsonStore(name) {
     if (name === "institutions") return { institutions: [] };
     if (name === "ownership") return { records: [] };
     if (name === "sharingSpaces") return { spaces: [] };
+    if (name === "aiConfigs") return { configs: [], activityConfigs: [] };
     return {};
   }
 }
@@ -103,6 +106,8 @@ async function countRows() {
     "course_activities",
     "activity_ownership",
     "sharing_spaces",
+    "ai_configs",
+    "activity_ai_config",
     "runs",
     "run_events"
   ];
@@ -127,6 +132,10 @@ async function main() {
     stores[name] = await readJsonStore(name);
     console.log(`[migrate] loaded ${files[name]}`);
   }
+  stores.assignments.assignments = (stores.assignments.assignments || []).map((assignment) => ({
+    ...assignment,
+    aiConfigId: assignment.aiConfigId || (assignment.prototypeId === "proto06" ? DEFAULT_PROTO06_AI_CONFIG_ID : null)
+  }));
 
   if (dryRun) {
     console.log("[dry-run] no rows written.");
@@ -135,7 +144,8 @@ async function main() {
       courses: stores.courses.courses?.length || 0,
       institutions: stores.institutions.institutions?.length || 0,
       ownership: stores.ownership.records?.length || 0,
-      runs: stores.runs.runs?.length || 0
+      runs: stores.runs.runs?.length || 0,
+      aiConfigs: stores.aiConfigs.configs?.length || 0
     }, null, 2));
     return;
   }
@@ -150,6 +160,7 @@ async function main() {
     "assignments",
     "ownership",
     "sharingSpaces",
+    "aiConfigs",
     "runs"
   ];
   for (const name of order) {

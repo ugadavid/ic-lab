@@ -1,6 +1,6 @@
-# IC-Lab Hub V0.6.2 - MariaDB
+# IC-Lab Hub V0.7 - MariaDB
 
-Cette couche MariaDB est experimentale mais durcie en V0.6.2. Le mode JSON reste le mode par defaut et les fichiers JSON ne sont pas supprimes.
+Cette couche MariaDB est experimentale mais durcie jusqu'a la V0.7. Le mode JSON reste le mode par defaut et les fichiers JSON ne sont pas supprimes.
 
 ## Prerequis
 
@@ -53,6 +53,8 @@ Le script :
 - insere/met a jour les tables avec `INSERT ... ON DUPLICATE KEY UPDATE`;
 - ne fait pas de `DROP TABLE` et ne supprime pas les fichiers JSON.
 
+La V0.7 migre aussi `data/ai-configs.json` vers `ai_configs` et `activity_ai_config`.
+
 ## Procedures stockees
 
 Le fichier `db/procedures.sql` installe les routines critiques du mode MariaDB :
@@ -92,6 +94,26 @@ La commande affiche les counts principaux et les incoherences detectees :
 - ownership sans prototype connu;
 - doublons potentiels `prototypeId + activityId + activitySource`.
 
+## Tables AIConfig
+
+La V0.7 ajoute :
+
+- `ai_configs` : profils de configuration IA/voix par prototype, sans secret ni appel provider;
+- `activity_ai_config` : table de liaison preparatoire entre une activite referencee et une configuration IA.
+- `course_activities.ai_config_id` : configuration IA/voix choisie pour une assignation de cours.
+
+Les profils seedes pour `proto06` couvrent :
+
+- mode scenarise + voix navigateur;
+- IA texte future + voix navigateur;
+- IA texte future + voix API;
+- agent vocal temps reel futur;
+- multi-agents experimental.
+
+Les couts restent qualitatifs : `free`, `low`, `medium`, `high`, `very-high`.
+
+En V0.7.1, l'association prioritaire se fait au niveau de l'assignation (`course_activities.ai_config_id`) afin qu'une meme activite puisse etre scenarisee dans un cours et associee a un mode IA futur dans un autre. La table `activity_ai_config` reste disponible pour une evolution plus fine.
+
 ## Repartition des responsabilites
 
 Cote Node :
@@ -102,6 +124,8 @@ Cote Node :
 - hash du `launchToken`;
 - logique de visibilite effective;
 - fallback JSON.
+- exposition API des configurations IA;
+- edition admin de metadonnees non secretes.
 
 Cote MariaDB :
 
@@ -109,6 +133,8 @@ Cote MariaDB :
 - coherence `runs` + `run_events`;
 - coherence `course_activities` + `activity_ownership`;
 - diagnostics routines et vue ownership.
+- stockage des profils `ai_configs`.
+- persistance du mode choisi dans `course_activities.ai_config_id`.
 
 ## Lancement serveur
 
