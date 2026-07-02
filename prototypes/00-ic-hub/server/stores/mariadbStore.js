@@ -26,6 +26,38 @@ function runEventId(runId, event, index) {
   return event.id || `event_${runId}_${event.at || event.createdAt || index}_${event.type}`.replace(/[^a-zA-Z0-9_]/g, "_");
 }
 
+function ownershipIdFor(prototypeId, activityId, activitySource) {
+  return `own_${String(prototypeId).replace(/[^a-z0-9]+/gi, "_")}_${String(activityId).replace(/[^a-z0-9]+/gi, "_")}_${String(activitySource).replace(/[^a-z0-9]+/gi, "_")}`;
+}
+
+function generatedRunEventId(runId) {
+  return `event_${runId}_${crypto.randomUUID()}`.replace(/[^a-zA-Z0-9_]/g, "_");
+}
+
+function mapOwnershipRow(row) {
+  return {
+    id: row.id,
+    prototypeId: row.prototype_id,
+    activityId: row.activity_id,
+    activitySource: row.activity_source,
+    title: row.title,
+    ownerId: row.owner_id,
+    createdBy: row.created_by,
+    updatedBy: row.updated_by,
+    institutionId: row.institution_id,
+    visibility: row.visibility,
+    provenance: parseJson(row.provenance_json, {}),
+    notes: row.notes,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at
+  };
+}
+
+async function countRows(connection, tableName) {
+  const [rows] = await connection.query(`SELECT COUNT(*) AS count FROM ${tableName}`);
+  return Number(rows[0]?.count || 0);
+}
+
 async function readStore(name) {
   const pool = getPool();
   if (name === "users") {
@@ -231,6 +263,106 @@ async function readStore(name) {
   throw new Error(`Store MariaDB inconnu: ${name}`);
 }
 
+async function createRun(run) {
+  const pool = getPool();
+  await pool.query("CALL sp_create_run(?, ?, ?, ?, ?, ?, ?, ?, ?)", [
+    run.id,
+    run.courseId,
+    run.assignmentId,
+    run.prototypeId,
+    run.activityId,
+    run.activitySource,
+    run.studentId,
+    run.launchTokenHash,
+    run.createdAt || null
+  ]);
+  return run;
+}
+
+async function appendRunEvent({ runId, launchToken, type, payload, createdAt }) {
+  const pool = getPool();
+  const [runs] = await pool.execute("SELECT launch_token_hash FROM runs WHERE id = ?", [runId]);
+  const run = runs[0];
+  if (!run) {
+    return { statusCode: 404, body: { error: "Run introuvable." } };
+  }
+  if (run.launch_token_hash !== tokenHash(launchToken)) {
+    return { statusCode: 401, body: { error: "launchToken invalide." } };
+  }
+
+  const [sets] = await pool.query("CALL sp_append_run_event(?, ?, ?, ?, ?)", [
+    generatedRunEventId(runId),
+    runId,
+    type,
+    json(payload || {}),
+    createdAt
+  ]);
+  const row = Array.isArray(sets) && Array.isArray(sets[0]) ? sets[0][0] : null;
+  return {
+    statusCode: 200,
+    body: {
+      ok: true,
+      eventCount: Number(row?.event_count || 0),
+      status: row?.status || "unknown"
+    }
+  };
+}
+
+async function createAssignmentWithOwnership({ assignment, course, user, title }) {
+  const pool = getPool();
+  const stamp = assignment.createdAt || new Date().toISOString();
+  const activitySource = assignment.activitySource || "server";
+  const provenance = {
+    kind: activitySource === "server" ? "external-prototype" : "manual",
+    sourcePrototype: assignment.prototypeId,
+    sourceActivityId: assignment.activityId,
+    importedAt: stamp,
+    registeredBy: user.id
+  };
+  const [sets] = await pool.query("CALL sp_assign_activity_with_ownership(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [
+    assignment.id,
+    assignment.courseId,
+    assignment.prototypeId,
+    assignment.activityId,
+    activitySource,
+    title || assignment.activityTitle || assignment.activityId,
+    json(assignment.activitySnapshot),
+    assignment.assignedBy || user.id,
+    assignment.createdBy || user.id,
+    assignment.updatedBy || user.id,
+    assignment.institutionId || course?.institutionId || user.institutionId || null,
+    assignment.visibility || course?.visibility || "course",
+    ownershipIdFor(assignment.prototypeId, assignment.activityId, activitySource),
+    course?.ownerId || course?.teacherId || user.id,
+    json(provenance),
+    stamp
+  ]);
+  const row = Array.isArray(sets) && Array.isArray(sets[0]) ? sets[0][0] : null;
+  return row ? mapOwnershipRow(row) : null;
+}
+
+async function healthSummary() {
+  const pool = getPool();
+  const connection = await pool.getConnection();
+  try {
+    await connection.query("SELECT 1 AS ok");
+    const counts = {};
+    for (const tableName of ["users", "courses", "enrollments", "course_activities", "activity_ownership", "runs", "run_events"]) {
+      counts[tableName] = await countRows(connection, tableName);
+    }
+    const config = require("../db/db").dbConfig();
+    return {
+      ok: true,
+      database: config.database,
+      host: config.host,
+      port: config.port,
+      counts
+    };
+  } finally {
+    connection.release();
+  }
+}
+
 async function writeStore(name, store) {
   const pool = getPool();
   if (name === "users") {
@@ -373,6 +505,10 @@ async function writeStore(name, store) {
 }
 
 module.exports = {
+  appendRunEvent,
+  createAssignmentWithOwnership,
+  createRun,
+  healthSummary,
   readStore,
   writeStore,
   tokenHash

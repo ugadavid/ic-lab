@@ -4,7 +4,7 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 
 const PORT = Number(process.env.PORT || 8790);
-const VERSION = "0.6";
+const VERSION = "0.6.2";
 const SERVICE = "ic-hub-local";
 const ROOT_DIR = path.resolve(__dirname, "..");
 const PUBLIC_DIR = path.join(ROOT_DIR, "public");
@@ -12,6 +12,7 @@ const DATA_DIR = path.join(__dirname, "data");
 const STORE_MODE = (process.env.IC_HUB_STORE || "json").toLowerCase();
 let mariaDbStore = null;
 let mariaDbAvailable = false;
+let lastMariaDbError = null;
 
 const stores = {
   users: "users.json",
@@ -235,6 +236,7 @@ async function readJson(name) {
       return await mariaDbStore.readStore(name);
     } catch (error) {
       mariaDbAvailable = false;
+      lastMariaDbError = error.message;
       console.error(`[db] MariaDB read failed for ${name}, falling back to JSON: ${error.message}`);
     }
   }
@@ -256,6 +258,7 @@ async function writeJson(name, data) {
       return;
     } catch (error) {
       mariaDbAvailable = false;
+      lastMariaDbError = error.message;
       console.error(`[db] MariaDB write failed for ${name}, falling back to JSON: ${error.message}`);
     }
   }
@@ -268,6 +271,32 @@ async function writeJson(name, data) {
   } catch (error) {
     console.error(`[data] failed to write ${stores[name]}: ${error.message}`);
     throw new Error(`Ecriture JSON impossible: ${stores[name]}`);
+  }
+}
+
+function isMariaDbActive() {
+  return STORE_MODE === "mariadb" && mariaDbAvailable && mariaDbStore;
+}
+
+async function storeHealth() {
+  const activeStore = isMariaDbActive() ? "mariadb" : "json";
+  const health = {
+    ok: true,
+    service: SERVICE,
+    version: VERSION,
+    store: activeStore,
+    requestedStore: STORE_MODE
+  };
+  if (STORE_MODE !== "mariadb") return health;
+  if (!mariaDbStore) {
+    return { ...health, db: { ok: false, lastError: lastMariaDbError || "MariaDB store non initialise." } };
+  }
+  try {
+    const db = await mariaDbStore.healthSummary();
+    return { ...health, store: "mariadb", db: { ...db, lastError: lastMariaDbError } };
+  } catch (error) {
+    lastMariaDbError = error.message;
+    return { ...health, ok: false, store: "json", db: { ok: false, lastError: error.message } };
   }
 }
 
@@ -1048,6 +1077,32 @@ async function handleRuns(request, response, url, user) {
       return sendJson(response, 400, { error: "Cette assignation ne peut pas encore produire de trace de lancement." });
     }
 
+    if (isMariaDbActive()) {
+      const runId = id("run");
+      const launchToken = crypto.randomBytes(32).toString("hex");
+      const stamp = now();
+      const launchUrl = buildProto06LaunchUrl(prototype, assignment, runId, launchToken);
+      const run = {
+        id: runId,
+        courseId,
+        assignmentId,
+        prototypeId: assignment.prototypeId,
+        activityId: assignment.activityId,
+        activitySource: assignment.activitySource || "server",
+        studentId: user.id,
+        status: "created",
+        createdAt: stamp,
+        startedAt: null,
+        completedAt: null,
+        durationMs: null,
+        launchTokenHash: hashLaunchToken(launchToken),
+        events: []
+      };
+      await mariaDbStore.createRun(run);
+      console.log(`[runs] start ${runId} student=${user.id} assignment=${assignmentId} store=mariadb`);
+      return sendJson(response, 201, { runId, launchToken, launchUrl });
+    }
+
     return withJsonWriteLock("runs", async () => {
       const runsStore = await readJson("runs");
       const runId = id("run");
@@ -1100,6 +1155,23 @@ async function handleRunEvent(request, response, url) {
   const type = String(body.type || "").trim();
   if (!allowedTypes.has(type)) {
     return sendJson(response, 400, { error: "Type d'evenement inconnu." });
+  }
+
+  if (isMariaDbActive()) {
+    const stamp = now();
+    const result = await mariaDbStore.appendRunEvent({
+      runId,
+      launchToken: body.launchToken,
+      type,
+      payload: compactRunEventPayload(type, body.payload),
+      createdAt: stamp
+    });
+    if (result.statusCode === 401) {
+      console.log(`[runs] rejected event ${type} run=${runId} invalid-token store=mariadb`);
+    } else if (result.statusCode === 200) {
+      console.log(`[runs] event ${type} run=${runId} store=mariadb`);
+    }
+    return sendJson(response, result.statusCode, result.body);
   }
 
   return withJsonWriteLock("runs", async () => {
@@ -1292,6 +1364,8 @@ async function handleCourses(request, response, url, user) {
       if (!body.prototypeId || !body.activityId || !body.activitySource) {
         return sendJson(response, 400, { error: "prototypeId, activityId et activitySource sont obligatoires." });
       }
+      const coursesStore = await readJson("courses");
+      const course = coursesStore.courses.find((item) => item.id === courseIdForActivities);
       const assignment = {
         id: id("assign"),
         courseId: courseIdForActivities,
@@ -1305,14 +1379,22 @@ async function handleCourses(request, response, url, user) {
         assignedBy: user.id,
         createdBy: user.id,
         updatedBy: user.id,
-        institutionId: (await readJson("courses")).courses.find((course) => course.id === courseIdForActivities)?.institutionId || user.institutionId || null,
+        institutionId: course?.institutionId || user.institutionId || null,
         visibility: normalizeVisibility(body.visibility, "course"),
-        createdAt: now()
+        createdAt: now(),
+        updatedAt: now()
       };
+      if (isMariaDbActive()) {
+        const ownership = await mariaDbStore.createAssignmentWithOwnership({
+          assignment,
+          course,
+          user,
+          title: assignment.activityTitle || assignment.activitySnapshot?.title || assignment.activityId
+        });
+        return sendJson(response, 201, { assignment: { ...assignment, ownership } });
+      }
       assignmentsStore.assignments.push(assignment);
       await writeJson("assignments", assignmentsStore);
-      const coursesStore = await readJson("courses");
-      const course = coursesStore.courses.find((item) => item.id === courseIdForActivities);
       const ownership = await ensureActivityOwnershipRecord({
         assignment,
         course,
@@ -1482,7 +1564,9 @@ async function handleSharingSpaces(request, response, url) {
 
 async function handleApi(request, response, url) {
   if (request.method === "OPTIONS") return sendJson(response, 204, {});
-  if (url.pathname === "/api/health") return sendJson(response, 200, { ok: true, service: SERVICE, version: VERSION });
+  if (url.pathname === "/api/health" || url.pathname === "/api/health/db") {
+    return sendJson(response, 200, await storeHealth());
+  }
 
   const eventHandled = await handleRunEvent(request, response, url);
   if (eventHandled !== false) return;
@@ -1563,10 +1647,10 @@ async function serveStatic(response, url) {
   }
 
   const redirects = new Map([
-    ["/student.html", "/student-0.6.html"],
-    ["/teacher.html", "/teacher-0.6.html"],
-    ["/hub.html", "/hub-0.6.html"],
-    ["/admin.html", "/admin-0.6.html"]
+    ["/student.html", "/student-0.6.1.html"],
+    ["/teacher.html", "/teacher-0.6.1.html"],
+    ["/hub.html", "/hub-0.6.1.html"],
+    ["/admin.html", "/admin-0.6.1.html"]
   ]);
   if (redirects.has(url.pathname)) {
     response.writeHead(302, { location: redirects.get(url.pathname) });
@@ -1633,6 +1717,7 @@ async function initStoreMode() {
     console.log("[startup] store mode mariadb");
   } catch (error) {
     mariaDbAvailable = false;
+    lastMariaDbError = error.message;
     console.error(`[startup] MariaDB unavailable, using JSON fallback: ${error.message}`);
   }
 }

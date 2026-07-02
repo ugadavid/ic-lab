@@ -1,13 +1,15 @@
 {
   "name": "ic-hub-v0.1",
-  "version": "0.6.0",
+  "version": "0.6.2",
   "private": true,
   "description": "Hub IC-Lab local experimental pour comptes, roles, cours et prototypes.",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "check": "node --check server.js",
-    "migrate:mariadb": "node db/migrate-json-to-mariadb.js"
+    "migrate:mariadb": "node db/migrate-json-to-mariadb.js",
+    "check:db": "node db/check-db-consistency.js",
+    "check:routines": "node db/check-db-routines.js"
   },
   "dependencies": {
     "mysql2": "^3.11.5"

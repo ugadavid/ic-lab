@@ -50,6 +50,47 @@ async function executeSchema() {
   console.log("[migrate] schema.sql executed.");
 }
 
+function splitSqlScript(script) {
+  const statements = [];
+  let delimiter = ";";
+  let buffer = "";
+  for (const line of script.split(/\r?\n/)) {
+    const delimiterMatch = line.match(/^\s*DELIMITER\s+(.+)\s*$/i);
+    if (delimiterMatch) {
+      if (buffer.trim()) {
+        statements.push(buffer.trim());
+        buffer = "";
+      }
+      delimiter = delimiterMatch[1];
+      continue;
+    }
+
+    buffer += `${line}\n`;
+    if (buffer.trimEnd().endsWith(delimiter)) {
+      const end = buffer.lastIndexOf(delimiter);
+      const statement = buffer.slice(0, end).trim();
+      if (statement) statements.push(statement);
+      buffer = "";
+    }
+  }
+  if (buffer.trim()) statements.push(buffer.trim());
+  return statements;
+}
+
+async function executeProcedures() {
+  const file = path.join(__dirname, "procedures.sql");
+  const procedures = await fs.readFile(file, "utf8");
+  if (dryRun) {
+    console.log("[dry-run] procedures.sql would be executed.");
+    return;
+  }
+  const pool = getPool();
+  for (const statement of splitSqlScript(procedures)) {
+    await pool.query(statement);
+  }
+  console.log("[migrate] procedures.sql executed.");
+}
+
 async function countRows() {
   const pool = getPool();
   const tables = [
@@ -79,6 +120,7 @@ async function main() {
   await testConnection();
   console.log("[migrate] MariaDB connection OK.");
   await executeSchema();
+  await executeProcedures();
 
   const stores = {};
   for (const name of Object.keys(files)) {
