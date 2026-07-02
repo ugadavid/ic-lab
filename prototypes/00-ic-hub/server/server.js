@@ -4,7 +4,7 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 
 const PORT = Number(process.env.PORT || 8790);
-const VERSION = "0.7.2";
+const VERSION = "0.7.3";
 const SERVICE = "ic-hub-local";
 const ROOT_DIR = path.resolve(__dirname, "..");
 const PUBLIC_DIR = path.join(ROOT_DIR, "public");
@@ -253,7 +253,7 @@ const defaultStores = {
         baseUrl: "http://127.0.0.1:8788",
         libraryUrl: "http://127.0.0.1:8788/library-1.1.html",
         activityApiUrl: "http://127.0.0.1:8788/api/activities",
-        launchUrl: "http://127.0.0.1:8788/index-1.1.4.html",
+        launchUrl: "http://127.0.0.1:8788/index-1.2.html",
         supportsActivities: true,
         tags: ["REPLI4C", "oral", "rencontre", "activite"]
       },
@@ -524,7 +524,7 @@ function normalizePrototype(prototype) {
     baseUrl: prototype.baseUrl || "http://127.0.0.1:8788",
     libraryUrl: prototype.libraryUrl || "http://127.0.0.1:8788/library-1.1.html",
     activityApiUrl: prototype.activityApiUrl || "http://127.0.0.1:8788/api/activities",
-    launchUrl: prototype.launchUrl || "http://127.0.0.1:8788/index-1.1.4.html",
+    launchUrl: prototype.launchUrl || "http://127.0.0.1:8788/index-1.2.html",
     supportsActivities: true
   };
 }
@@ -1186,7 +1186,7 @@ function hashLaunchToken(token) {
 }
 
 function buildProto06LaunchUrl(prototype, assignment, runId, launchToken) {
-  const base = prototype.launchUrl || "http://127.0.0.1:8788/index-1.1.4.html";
+  const base = prototype.launchUrl || "http://127.0.0.1:8788/index-1.2.html";
   const aiConfigId = assignment.aiConfigId || DEFAULT_PROTO06_AI_CONFIG_ID;
   const params = new URLSearchParams({
     activityId: assignment.activityId,
@@ -1222,6 +1222,14 @@ function compactRunEventPayload(type, payload = {}) {
     "activitySource",
     "scenarioId",
     "characterCount",
+    "aiConfigId",
+    "status",
+    "mode",
+    "runtimeEnabled",
+    "assignedMode",
+    "selectedRuntime",
+    "fallback",
+    "generated",
     "message",
     "reason",
     "href"
@@ -1430,6 +1438,9 @@ async function handleRunEvent(request, response, url) {
     "meeting_started",
     "user_answer_submitted",
     "activity_completed",
+    "ai_config_resolved",
+    "agent_runtime_selected",
+    "agent_runtime_fallback",
     "error"
   ]);
   const runId = decodeURIComponent(match[1]);
