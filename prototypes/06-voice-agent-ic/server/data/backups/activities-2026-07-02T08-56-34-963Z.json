@@ -1,0 +1,31 @@
+{
+  "version": "1.1",
+  "updatedAt": "2026-07-02T08:56:34.959Z",
+  "activities": [
+    {
+      "scenarioId": "globalUnderstanding",
+      "title": "Test serveur V1.1",
+      "climateThemes": [
+        "eau"
+      ],
+      "commonQuestion": "Que comprenez-vous des temoignages ?",
+      "characterIds": [
+        "clara",
+        "marco"
+      ],
+      "languages": [
+        "es",
+        "it"
+      ],
+      "tags": [
+        "test-v1.1"
+      ],
+      "pedagogicalGoal": "Verifier la sauvegarde serveur locale.",
+      "id": "server-activity-4aaba3d8-fcce-4bb5-a3d0-3c78ed937fff",
+      "source": "server",
+      "status": "server-draft",
+      "createdAt": "2026-07-02T08:56:34.958Z",
+      "updatedAt": "2026-07-02T08:56:34.958Z"
+    }
+  ]
+}
