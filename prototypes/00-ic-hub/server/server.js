@@ -4,7 +4,7 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 
 const PORT = Number(process.env.PORT || 8790);
-const VERSION = "0.7.1";
+const VERSION = "0.7.2";
 const SERVICE = "ic-hub-local";
 const ROOT_DIR = path.resolve(__dirname, "..");
 const PUBLIC_DIR = path.join(ROOT_DIR, "public");
@@ -253,7 +253,7 @@ const defaultStores = {
         baseUrl: "http://127.0.0.1:8788",
         libraryUrl: "http://127.0.0.1:8788/library-1.1.html",
         activityApiUrl: "http://127.0.0.1:8788/api/activities",
-        launchUrl: "http://127.0.0.1:8788/index-1.1.3.html",
+        launchUrl: "http://127.0.0.1:8788/index-1.1.4.html",
         supportsActivities: true,
         tags: ["REPLI4C", "oral", "rencontre", "activite"]
       },
@@ -524,7 +524,7 @@ function normalizePrototype(prototype) {
     baseUrl: prototype.baseUrl || "http://127.0.0.1:8788",
     libraryUrl: prototype.libraryUrl || "http://127.0.0.1:8788/library-1.1.html",
     activityApiUrl: prototype.activityApiUrl || "http://127.0.0.1:8788/api/activities",
-    launchUrl: prototype.launchUrl || "http://127.0.0.1:8788/index-1.1.3.html",
+    launchUrl: prototype.launchUrl || "http://127.0.0.1:8788/index-1.1.4.html",
     supportsActivities: true
   };
 }
@@ -1080,7 +1080,7 @@ function sendJson(response, status, body) {
     "content-type": "application/json; charset=utf-8",
     "access-control-allow-origin": "*",
     "access-control-allow-methods": "GET,POST,PUT,DELETE,OPTIONS",
-    "access-control-allow-headers": "content-type, authorization"
+    "access-control-allow-headers": "content-type, authorization, x-launch-token"
   });
   response.end(JSON.stringify(body, null, 2));
   return true;
@@ -1186,7 +1186,7 @@ function hashLaunchToken(token) {
 }
 
 function buildProto06LaunchUrl(prototype, assignment, runId, launchToken) {
-  const base = prototype.launchUrl || "http://127.0.0.1:8788/index-1.1.3.html";
+  const base = prototype.launchUrl || "http://127.0.0.1:8788/index-1.1.4.html";
   const aiConfigId = assignment.aiConfigId || DEFAULT_PROTO06_AI_CONFIG_ID;
   const params = new URLSearchParams({
     activityId: assignment.activityId,
@@ -1255,6 +1255,81 @@ function enrichRuns(runs, usersStore, assignmentsStore) {
       activityTitle: assignment?.activityTitle || assignment?.activitySnapshot?.title || run.activityId,
       eventCount: Array.isArray(run.events) ? run.events.length : 0
     };
+  });
+}
+
+function publicRuntimeAiConfig(config) {
+  if (!config) return null;
+  return {
+    id: config.id,
+    title: config.title,
+    description: config.description,
+    prototypeId: config.prototypeId,
+    mode: config.mode,
+    provider: config.provider,
+    modelId: config.modelId ?? null,
+    voiceMode: config.voiceMode,
+    voiceProvider: config.voiceProvider,
+    estimatedCostLevel: config.estimatedCostLevel,
+    estimatedCostNotes: config.estimatedCostNotes,
+    maxDurationSeconds: config.maxDurationSeconds,
+    languagePolicy: config.languagePolicy,
+    pedagogicalRole: config.pedagogicalRole,
+    allowParticipantAgents: Boolean(config.allowParticipantAgents),
+    allowTutorAgent: Boolean(config.allowTutorAgent),
+    allowObserverAgent: Boolean(config.allowObserverAgent),
+    costVisibleToTeacher: Boolean(config.costVisibleToTeacher),
+    requiresApiKey: Boolean(config.requiresApiKey),
+    status: config.status,
+    warnings: Array.isArray(config.warnings) ? config.warnings : [],
+    runtimeEnabled: false
+  };
+}
+
+async function handleRunAiConfig(request, response, url) {
+  const match = url.pathname.match(/^\/api\/runs\/([^/]+)\/ai-config$/);
+  if (!match || request.method !== "GET") return false;
+
+  const runId = decodeURIComponent(match[1]);
+  const launchToken = String(request.headers["x-launch-token"] || url.searchParams.get("launchToken") || "").trim();
+  if (!launchToken) {
+    return sendJson(response, 401, { error: "Launch token requis." });
+  }
+
+  const [runsStore, assignmentsStore, aiConfigsStore] = await Promise.all([
+    readJson("runs"),
+    readJson("assignments"),
+    readJson("aiConfigs")
+  ]);
+  const run = (runsStore.runs || []).find((item) => item.id === runId);
+  if (!run) {
+    return sendJson(response, 404, { error: "Run introuvable." });
+  }
+  if (run.launchTokenHash !== hashLaunchToken(launchToken)) {
+    return sendJson(response, 401, { error: "Launch token invalide." });
+  }
+
+  const assignment = (assignmentsStore.assignments || []).find((item) => item.id === run.assignmentId);
+  if (!assignment) {
+    return sendJson(response, 404, { error: "Assignation du run introuvable." });
+  }
+
+  const aiConfigId = assignment.aiConfigId || (assignment.prototypeId === "proto06" ? DEFAULT_PROTO06_AI_CONFIG_ID : "");
+  if (!aiConfigId) {
+    return sendJson(response, 404, { error: "Aucune configuration IA associee a cette assignation." });
+  }
+
+  const config = (aiConfigsStore.configs || []).find((item) => item.id === aiConfigId);
+  if (!config) {
+    return sendJson(response, 404, { error: "Configuration IA introuvable.", aiConfigId });
+  }
+
+  return sendJson(response, 200, {
+    runId,
+    assignmentId: assignment.id,
+    aiConfigId,
+    runtimeEnabled: false,
+    aiConfig: publicRuntimeAiConfig(config)
   });
 }
 
@@ -1905,6 +1980,9 @@ async function handleApi(request, response, url) {
   if (url.pathname === "/api/health" || url.pathname === "/api/health/db") {
     return sendJson(response, 200, await storeHealth());
   }
+
+  const aiConfigHandled = await handleRunAiConfig(request, response, url);
+  if (aiConfigHandled !== false) return;
 
   const eventHandled = await handleRunEvent(request, response, url);
   if (eventHandled !== false) return;

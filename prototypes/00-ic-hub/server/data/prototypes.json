@@ -9,7 +9,7 @@
       "baseUrl": "http://127.0.0.1:8788",
       "libraryUrl": "http://127.0.0.1:8788/library-1.1.html",
       "activityApiUrl": "http://127.0.0.1:8788/api/activities",
-      "launchUrl": "http://127.0.0.1:8788/index-1.1.3.html",
+      "launchUrl": "http://127.0.0.1:8788/index-1.1.4.html",
       "supportsActivities": true,
       "tags": ["REPLI4C", "oral", "rencontre", "activite"]
     },
