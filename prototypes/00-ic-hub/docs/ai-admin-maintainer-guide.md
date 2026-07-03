@@ -4,7 +4,7 @@ Date: 2026-07-03
 
 ## Dernier etat valide
 
-- Hub : V0.9.2
+- Hub : V0.9.6
 - Prototype 06 : V1.2
 - Mode Proto06 : runtime scenarise securise
 - IA generative dans les activites : non
@@ -13,7 +13,7 @@ Date: 2026-07-03
 - Cles visibles cote navigateur : non
 - Derniere validation : 2026-07-03
 
-Cet etat correspond a une plateforme prete pour tests administrateurs avec AI Lab serveur, brouillons pedagogiques controles et grille d'evaluation locale, mais sans activation IA dans les parcours apprenants.
+Cet etat correspond a une plateforme prete pour tests administrateurs avec admin IA en app-shell, AI Lab serveur, brouillons pedagogiques controles, draft packs communs, grille d'evaluation locale et comparaison multi-evaluateurs hors ligne, mais sans activation IA dans les parcours apprenants.
 
 ## Etat general
 
@@ -84,7 +84,24 @@ Pour savoir si l'IA est reellement activee, verifier :
 - le code serveur du runtime;
 - l'absence ou presence d'un appel provider pendant l'activite.
 
-En V0.9.2, l'etat attendu est : generation possible uniquement dans l'AI Lab admin serveur, aucune generation IA dans le parcours apprenant.
+En V0.9.6, l'etat attendu est : generation possible uniquement dans l'AI Lab admin serveur, aucune generation IA dans le parcours apprenant.
+
+## Admin IA V0.9.6
+
+L'admin IA V0.9.6 est organise comme une app-shell avec une barre superieure, une navigation laterale fixe et une seule vue principale visible a la fois.
+
+Vues disponibles :
+
+- Tableau : etat valide et garde-fous principaux.
+- Catalogue : providers, synchronisation OpenAI serveur, filtres modeles et recommandations.
+- AIConfig : configurations locales, sans activation automatique.
+- Generer : generation admin-only de brouillons et export de draft pack.
+- Evaluer : import local de draft pack, grille locale, export evaluation.
+- Comparer : import local de plusieurs evaluations et export comparaison.
+- Securite : gouvernance, retour arriere, limites institutionnelles.
+- Systeme : health, stockage, utilisateurs, cours, prototypes, sessions.
+
+La navigation utilise le hash de l'URL (`#catalog`, `#evaluate`, etc.) et ne stocke pas les brouillons, evaluations, imports ou comparaisons dans `localStorage`.
 
 ## Emplacement de `.env`
 
@@ -117,15 +134,15 @@ Principes :
 
 ## Synchroniser OpenAI
 
-Depuis l'admin V0.9.2, le bouton de synchronisation appelle l'endpoint local :
+Depuis l'admin V0.9.6, le bouton de synchronisation appelle l'endpoint local :
 
 `POST /api/admin/ai/providers/openai/sync-models`
 
 Le navigateur contacte uniquement le Hub local. Le serveur contacte OpenAI pour lire la liste des modeles accessibles. Cette action ne lance aucune generation.
 
-## AI Lab scenarios controles et evaluation locale
+## AI Lab scenarios controles, draft packs et comparaison hors ligne
 
-La V0.9.2 conserve trois endpoints admin-only :
+La V0.9.6 conserve trois endpoints admin-only :
 
 - `GET /api/admin/ai/runtime/status`;
 - `POST /api/admin/ai/runtime/smoke-test`;
@@ -158,7 +175,7 @@ Le prompt complet est construit cote serveur. L'endpoint refuse les champs de pr
 
 La reponse de generation est structuree avec `draft`, `checks` et `safety`. Les checks restent locaux et simples : markdown detecte, point d'interrogation, longueur approximative et langue cible attendue.
 
-Les brouillons affiches dans l'admin V0.9.2 sont conserves uniquement en memoire JavaScript de la page. Ils disparaissent au rechargement. Ils ne sont pas envoyes en base.
+Les brouillons affiches dans l'admin V0.9.6 sont conserves uniquement en memoire JavaScript de la page. Ils disparaissent au rechargement. Ils ne sont pas envoyes en base.
 
 La V0.9.2 ajoute une grille d'evaluation locale par brouillon :
 
@@ -174,6 +191,34 @@ Chaque critere est note de 1 a 5. Le score moyen, les recommandations, les favor
 
 L'export JSON de session est genere cote navigateur. Il peut contenir les textes generes et les commentaires d'evaluation, mais aucun secret, token, cle API ou donnee apprenante.
 
+La V0.9.3 enrichit l'export avec :
+
+- `schema`;
+- `schemaVersion`;
+- `rubricVersion`;
+- `exportedAt`;
+- `evaluator.label`;
+- `drafts`;
+- `ratings`;
+- `score`;
+- `comment`;
+- `favorite`;
+- `safety`.
+
+La section `Comparaison multi-evaluateurs` importe plusieurs exports JSON cote navigateur uniquement. Les fichiers sont limites a 2 Mo chacun, valides par schema, puis compares localement. Aucun upload serveur n'est effectue.
+
+La comparaison affiche des agregats, un tableau de scores, les brouillons avec fort desaccord et des details par critere. L'export de comparaison est aussi genere cote navigateur.
+
+La V0.9.4 ajoute un format `ic-hub-ai-lab-draft-pack`. Le workflow recommande est :
+
+1. un admin genere un lot commun de brouillons;
+2. il exporte `Exporter le lot de brouillons a evaluer`;
+3. chaque evaluateur importe ce meme draft pack;
+4. chaque evaluateur note localement et exporte son evaluation;
+5. l'admin importe les evaluation-exports et compare les resultats.
+
+Les evaluations V0.9.4 contiennent `draftPackId` et conservent les `draftId` originaux. La comparaison regroupe prioritairement par `draftPackId + draftId` et affiche un warning si plusieurs packs differents sont melanges.
+
 Les appels OpenAI utilisent `store: false`. Les textes generes ne sont pas ecrits en base, ni dans `run_events`, ni injectes dans Prototype 06.
 
 ## Verifier le mode JSON
@@ -187,12 +232,12 @@ node server.js
 
 Puis ouvrir :
 
-`http://127.0.0.1:8790/admin-0.9.2.html`
+`http://127.0.0.1:8790/admin-0.9.6.html`
 
 Verifier :
 
 - health en `store = json`;
-- admin V0.9.2 accessible;
+- admin V0.9.6 accessible;
 - checklist visible;
 - modeles recommandes ou message fallback;
 - teacher/student interdits sur les endpoints admin IA.
@@ -209,14 +254,14 @@ node server.js
 
 Puis ouvrir :
 
-`http://127.0.0.1:8790/admin-0.9.2.html`
+`http://127.0.0.1:8790/admin-0.9.6.html`
 
 Verifier :
 
 - health en `store = mariadb`;
 - counts DB presents;
 - providers/modeles lisibles;
-- admin V0.9.2 accessible.
+- admin V0.9.6 accessible.
 
 ## Savoir si l'IA est active ou non
 
@@ -270,7 +315,7 @@ Pour qu'une IA generative soit reellement active, il faudrait explicitement :
 5. tester la securite;
 6. valider pedagogiquement.
 
-En V0.9.2, seuls les endpoints admin serveur sont actifs pour test controle. Aucun branchement Prototype 06 ou parcours apprenant n'est actif.
+En V0.9.6, seuls les endpoints admin serveur sont actifs pour test controle. Aucun branchement Prototype 06 ou parcours apprenant n'est actif.
 
 ## Donnees apprenantes
 
@@ -298,7 +343,7 @@ Avant toute activation generative :
 
 ## Prochaines etapes recommandees
 
-1. Verifier l'etat IA dans `admin-0.9.2.html`.
+1. Verifier l'etat IA dans `admin-0.9.6.html`.
 2. Synchroniser les modeles si la cle serveur est presente.
 3. Marquer 2 ou 3 modeles texte comme `recommended` apres verification.
 4. Renseigner les prix depuis les tarifs officiels.
