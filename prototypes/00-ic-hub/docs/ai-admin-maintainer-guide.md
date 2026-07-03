@@ -4,7 +4,7 @@ Date: 2026-07-03
 
 ## Dernier etat valide
 
-- Hub : V0.9
+- Hub : V0.9.2
 - Prototype 06 : V1.2
 - Mode Proto06 : runtime scenarise securise
 - IA generative dans les activites : non
@@ -13,7 +13,7 @@ Date: 2026-07-03
 - Cles visibles cote navigateur : non
 - Derniere validation : 2026-07-03
 
-Cet etat correspond a une plateforme prete pour tests administrateurs avec AI Lab serveur, mais sans activation IA dans les parcours apprenants.
+Cet etat correspond a une plateforme prete pour tests administrateurs avec AI Lab serveur, brouillons pedagogiques controles et grille d'evaluation locale, mais sans activation IA dans les parcours apprenants.
 
 ## Etat general
 
@@ -84,7 +84,7 @@ Pour savoir si l'IA est reellement activee, verifier :
 - le code serveur du runtime;
 - l'absence ou presence d'un appel provider pendant l'activite.
 
-En V0.9, l'etat attendu est : generation possible uniquement dans l'AI Lab admin serveur, aucune generation IA dans le parcours apprenant.
+En V0.9.2, l'etat attendu est : generation possible uniquement dans l'AI Lab admin serveur, aucune generation IA dans le parcours apprenant.
 
 ## Emplacement de `.env`
 
@@ -117,15 +117,15 @@ Principes :
 
 ## Synchroniser OpenAI
 
-Depuis l'admin V0.9, le bouton de synchronisation appelle l'endpoint local :
+Depuis l'admin V0.9.2, le bouton de synchronisation appelle l'endpoint local :
 
 `POST /api/admin/ai/providers/openai/sync-models`
 
 Le navigateur contacte uniquement le Hub local. Le serveur contacte OpenAI pour lire la liste des modeles accessibles. Cette action ne lance aucune generation.
 
-## AI Lab serveur controle
+## AI Lab scenarios controles et evaluation locale
 
-La V0.9 ajoute trois endpoints admin-only :
+La V0.9.2 conserve trois endpoints admin-only :
 
 - `GET /api/admin/ai/runtime/status`;
 - `POST /api/admin/ai/runtime/smoke-test`;
@@ -144,6 +144,36 @@ Le modele utilise doit venir du catalogue local `ai_models` :
 
 Le frontend ne peut pas fournir un nom de modele arbitraire.
 
+Le formulaire de brouillon envoie seulement des champs controles :
+
+- modele catalogue;
+- personnage;
+- langue cible;
+- scenario pedagogique;
+- theme climatique limite a 120 caracteres;
+- longueur entre 20 et 60 mots;
+- prudence pedagogique `safe` ou `exploratory`.
+
+Le prompt complet est construit cote serveur. L'endpoint refuse les champs de prompt libre, texte apprenant, launchToken ou donnees personnelles.
+
+La reponse de generation est structuree avec `draft`, `checks` et `safety`. Les checks restent locaux et simples : markdown detecte, point d'interrogation, longueur approximative et langue cible attendue.
+
+Les brouillons affiches dans l'admin V0.9.2 sont conserves uniquement en memoire JavaScript de la page. Ils disparaissent au rechargement. Ils ne sont pas envoyes en base.
+
+La V0.9.2 ajoute une grille d'evaluation locale par brouillon :
+
+- clarte pour l'intercomprehension;
+- transparence lexicale;
+- adequation au scenario;
+- naturel de la langue cible;
+- prudence pedagogique;
+- reutilisabilite dans Prototype 06;
+- cout / interet du modele.
+
+Chaque critere est note de 1 a 5. Le score moyen, les recommandations, les favoris et les commentaires restent en memoire JavaScript uniquement. Ils ne sont pas envoyes au serveur, pas stockes en base, pas ecrits dans `run_events` et pas conserves en `localStorage`.
+
+L'export JSON de session est genere cote navigateur. Il peut contenir les textes generes et les commentaires d'evaluation, mais aucun secret, token, cle API ou donnee apprenante.
+
 Les appels OpenAI utilisent `store: false`. Les textes generes ne sont pas ecrits en base, ni dans `run_events`, ni injectes dans Prototype 06.
 
 ## Verifier le mode JSON
@@ -157,12 +187,12 @@ node server.js
 
 Puis ouvrir :
 
-`http://127.0.0.1:8790/admin-0.9.html`
+`http://127.0.0.1:8790/admin-0.9.2.html`
 
 Verifier :
 
 - health en `store = json`;
-- admin V0.9 accessible;
+- admin V0.9.2 accessible;
 - checklist visible;
 - modeles recommandes ou message fallback;
 - teacher/student interdits sur les endpoints admin IA.
@@ -179,14 +209,14 @@ node server.js
 
 Puis ouvrir :
 
-`http://127.0.0.1:8790/admin-0.9.html`
+`http://127.0.0.1:8790/admin-0.9.2.html`
 
 Verifier :
 
 - health en `store = mariadb`;
 - counts DB presents;
 - providers/modeles lisibles;
-- admin V0.9 accessible.
+- admin V0.9.2 accessible.
 
 ## Savoir si l'IA est active ou non
 
@@ -240,7 +270,7 @@ Pour qu'une IA generative soit reellement active, il faudrait explicitement :
 5. tester la securite;
 6. valider pedagogiquement.
 
-En V0.9, seuls les endpoints admin serveur sont actifs pour test controle. Aucun branchement Prototype 06 ou parcours apprenant n'est actif.
+En V0.9.2, seuls les endpoints admin serveur sont actifs pour test controle. Aucun branchement Prototype 06 ou parcours apprenant n'est actif.
 
 ## Donnees apprenantes
 
@@ -268,7 +298,7 @@ Avant toute activation generative :
 
 ## Prochaines etapes recommandees
 
-1. Verifier l'etat IA dans `admin-0.9.html`.
+1. Verifier l'etat IA dans `admin-0.9.2.html`.
 2. Synchroniser les modeles si la cle serveur est presente.
 3. Marquer 2 ou 3 modeles texte comme `recommended` apres verification.
 4. Renseigner les prix depuis les tarifs officiels.

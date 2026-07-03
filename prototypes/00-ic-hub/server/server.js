@@ -8,7 +8,7 @@ const modelMetadataEnrichment = require("./ai/modelMetadataEnrichment");
 const openAiRuntime = require("./ai/openaiRuntime");
 
 const PORT = Number(process.env.PORT || 8790);
-const VERSION = "0.9";
+const VERSION = "0.9.2";
 const SERVICE = "ic-hub-local";
 const ROOT_DIR = path.resolve(__dirname, "..");
 const PUBLIC_DIR = path.join(ROOT_DIR, "public");
@@ -643,7 +643,7 @@ async function getEnrichedAiModelsStore() {
   ]);
   return {
     ...modelsStore,
-    version: "0.9",
+    version: "0.9.2",
     updatedAt: modelsStore.updatedAt || null,
     models: modelMetadataEnrichment.enrichModels(modelsStore.models || [], metadataStore)
   };
@@ -2124,7 +2124,7 @@ async function handleAdminAi(request, response, url, user) {
   if (request.method === "GET" && url.pathname === "/api/admin/ai/models") {
     const store = await getEnrichedAiModelsStore();
     return sendJson(response, 200, {
-      version: store.version || "0.9",
+      version: store.version || "0.9.2",
       updatedAt: store.updatedAt || null,
       models: Array.isArray(store.models) ? store.models : []
     });
@@ -2163,6 +2163,7 @@ async function handleAdminAi(request, response, url, user) {
         scenarioId: body.scenarioId,
         climateTheme: body.climateTheme,
         maxWords: body.maxWords,
+        pedagogicalStrictness: body.pedagogicalStrictness,
         catalogModels: store.models || []
       });
       console.log(`[admin-ai-runtime] ic-agent-draft model=${result.providerModelId} ok durationMs=${Date.now() - started}`);
@@ -2417,8 +2418,8 @@ async function serveStatic(response, url) {
   const redirects = new Map([
     ["/student.html", "/student-0.7.1.html"],
     ["/teacher.html", "/teacher-0.7.1.html"],
-    ["/hub.html", "/hub-0.9.html"],
-    ["/admin.html", "/admin-0.9.html"]
+    ["/hub.html", "/hub-0.9.2.html"],
+    ["/admin.html", "/admin-0.9.2.html"]
   ]);
   if (redirects.has(url.pathname)) {
     response.writeHead(302, { location: redirects.get(url.pathname) });
