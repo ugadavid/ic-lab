@@ -274,6 +274,7 @@ async function readStore(name) {
         mode: row.mode,
         provider: row.provider,
         modelId: row.model_id,
+        modelCatalogId: row.model_catalog_id,
         voiceMode: row.voice_mode,
         voiceProvider: row.voice_provider,
         estimatedCostLevel: row.estimated_cost_level,
@@ -298,6 +299,57 @@ async function readStore(name) {
         assignedBy: row.assigned_by,
         createdAt: row.created_at,
         updatedAt: row.updated_at
+      }))
+    };
+  }
+
+  if (name === "aiProviders") {
+    const [rows] = await pool.query("SELECT * FROM ai_providers ORDER BY id");
+    return {
+      version: "0.8",
+      providers: rows.map((row) => ({
+        id: row.id,
+        title: row.title,
+        type: row.type,
+        status: row.status,
+        apiKeyEnvName: row.api_key_env_name || "",
+        baseUrl: row.base_url || "",
+        supportsModelSync: Boolean(row.supports_model_sync),
+        supportsText: Boolean(row.supports_text),
+        supportsAudio: Boolean(row.supports_audio),
+        supportsRealtime: Boolean(row.supports_realtime),
+        supportsEmbeddings: Boolean(row.supports_embeddings),
+        notes: row.notes || "",
+        createdAt: row.created_at,
+        updatedAt: row.updated_at
+      }))
+    };
+  }
+
+  if (name === "aiModels") {
+    const [rows] = await pool.query("SELECT * FROM ai_models ORDER BY provider_id, family, provider_model_id");
+    return {
+      version: "0.8",
+      models: rows.map((row) => ({
+        id: row.id,
+        providerId: row.provider_id,
+        providerModelId: row.provider_model_id,
+        title: row.title,
+        family: row.family || "",
+        modality: row.modality || "",
+        capabilities: parseJson(row.capabilities_json, []),
+        status: row.status,
+        source: row.source || "",
+        contextWindow: row.context_window,
+        costLevel: row.cost_level || "",
+        recommendedUse: row.recommended_use || "",
+        allowedForTeachers: Boolean(row.allowed_for_teachers),
+        allowedForStudents: Boolean(row.allowed_for_students),
+        allowedForRuntime: Boolean(row.allowed_for_runtime),
+        notes: row.notes || "",
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        lastSeenAt: row.last_seen_at
       }))
     };
   }
@@ -390,7 +442,7 @@ async function healthSummary() {
   try {
     await connection.query("SELECT 1 AS ok");
     const counts = {};
-    for (const tableName of ["users", "courses", "enrollments", "course_activities", "activity_ownership", "ai_configs", "activity_ai_config", "runs", "run_events"]) {
+    for (const tableName of ["users", "courses", "enrollments", "course_activities", "activity_ownership", "ai_configs", "activity_ai_config", "ai_providers", "ai_models", "runs", "run_events"]) {
       counts[tableName] = await countRows(connection, tableName);
     }
     const config = require("../db/db").dbConfig();
@@ -547,10 +599,10 @@ async function writeStore(name, store) {
   if (name === "aiConfigs") {
     for (const config of store.configs || []) {
       await pool.execute(
-        `INSERT INTO ai_configs (id, title, description, prototype_id, mode, provider, model_id, voice_mode, voice_provider, estimated_cost_level, estimated_cost_notes, max_duration_seconds, language_policy, pedagogical_role, allow_participant_agents, allow_tutor_agent, allow_observer_agent, cost_visible_to_teacher, requires_api_key, status, warnings_json, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE title=VALUES(title), description=VALUES(description), prototype_id=VALUES(prototype_id), mode=VALUES(mode), provider=VALUES(provider), model_id=VALUES(model_id), voice_mode=VALUES(voice_mode), voice_provider=VALUES(voice_provider), estimated_cost_level=VALUES(estimated_cost_level), estimated_cost_notes=VALUES(estimated_cost_notes), max_duration_seconds=VALUES(max_duration_seconds), language_policy=VALUES(language_policy), pedagogical_role=VALUES(pedagogical_role), allow_participant_agents=VALUES(allow_participant_agents), allow_tutor_agent=VALUES(allow_tutor_agent), allow_observer_agent=VALUES(allow_observer_agent), cost_visible_to_teacher=VALUES(cost_visible_to_teacher), requires_api_key=VALUES(requires_api_key), status=VALUES(status), warnings_json=VALUES(warnings_json), updated_at=VALUES(updated_at)`,
-        [config.id, config.title, config.description || "", config.prototypeId, config.mode, config.provider || "none", config.modelId || null, config.voiceMode || null, config.voiceProvider || null, config.estimatedCostLevel || null, config.estimatedCostNotes || null, config.maxDurationSeconds ?? null, config.languagePolicy || null, config.pedagogicalRole || null, config.allowParticipantAgents ? 1 : 0, config.allowTutorAgent ? 1 : 0, config.allowObserverAgent ? 1 : 0, config.costVisibleToTeacher === false ? 0 : 1, config.requiresApiKey ? 1 : 0, config.status || "planned", json(config.warnings || []), config.createdAt || null, config.updatedAt || null]
+        `INSERT INTO ai_configs (id, title, description, prototype_id, mode, provider, model_id, model_catalog_id, voice_mode, voice_provider, estimated_cost_level, estimated_cost_notes, max_duration_seconds, language_policy, pedagogical_role, allow_participant_agents, allow_tutor_agent, allow_observer_agent, cost_visible_to_teacher, requires_api_key, status, warnings_json, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE title=VALUES(title), description=VALUES(description), prototype_id=VALUES(prototype_id), mode=VALUES(mode), provider=VALUES(provider), model_id=VALUES(model_id), model_catalog_id=VALUES(model_catalog_id), voice_mode=VALUES(voice_mode), voice_provider=VALUES(voice_provider), estimated_cost_level=VALUES(estimated_cost_level), estimated_cost_notes=VALUES(estimated_cost_notes), max_duration_seconds=VALUES(max_duration_seconds), language_policy=VALUES(language_policy), pedagogical_role=VALUES(pedagogical_role), allow_participant_agents=VALUES(allow_participant_agents), allow_tutor_agent=VALUES(allow_tutor_agent), allow_observer_agent=VALUES(allow_observer_agent), cost_visible_to_teacher=VALUES(cost_visible_to_teacher), requires_api_key=VALUES(requires_api_key), status=VALUES(status), warnings_json=VALUES(warnings_json), updated_at=VALUES(updated_at)`,
+        [config.id, config.title, config.description || "", config.prototypeId, config.mode, config.provider || "none", config.modelId || null, config.modelCatalogId || null, config.voiceMode || null, config.voiceProvider || null, config.estimatedCostLevel || null, config.estimatedCostNotes || null, config.maxDurationSeconds ?? null, config.languagePolicy || null, config.pedagogicalRole || null, config.allowParticipantAgents ? 1 : 0, config.allowTutorAgent ? 1 : 0, config.allowObserverAgent ? 1 : 0, config.costVisibleToTeacher === false ? 0 : 1, config.requiresApiKey ? 1 : 0, config.status || "planned", json(config.warnings || []), config.createdAt || null, config.updatedAt || null]
       );
     }
     for (const link of store.activityConfigs || []) {
@@ -559,6 +611,30 @@ async function writeStore(name, store) {
          VALUES (?, ?, ?, ?, ?, ?)
          ON DUPLICATE KEY UPDATE ai_config_id=VALUES(ai_config_id), assigned_by=VALUES(assigned_by), updated_at=VALUES(updated_at)`,
         [link.id, link.activityOwnershipId, link.aiConfigId, link.assignedBy || null, link.createdAt || null, link.updatedAt || null]
+      );
+    }
+    return;
+  }
+
+  if (name === "aiProviders") {
+    for (const provider of store.providers || []) {
+      await pool.execute(
+        `INSERT INTO ai_providers (id, title, type, status, api_key_env_name, base_url, supports_model_sync, supports_text, supports_audio, supports_realtime, supports_embeddings, notes, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE title=VALUES(title), type=VALUES(type), status=VALUES(status), api_key_env_name=VALUES(api_key_env_name), base_url=VALUES(base_url), supports_model_sync=VALUES(supports_model_sync), supports_text=VALUES(supports_text), supports_audio=VALUES(supports_audio), supports_realtime=VALUES(supports_realtime), supports_embeddings=VALUES(supports_embeddings), notes=VALUES(notes), updated_at=VALUES(updated_at)`,
+        [provider.id, provider.title, provider.type, provider.status || "planned", provider.apiKeyEnvName || null, provider.baseUrl || null, provider.supportsModelSync ? 1 : 0, provider.supportsText ? 1 : 0, provider.supportsAudio ? 1 : 0, provider.supportsRealtime ? 1 : 0, provider.supportsEmbeddings ? 1 : 0, provider.notes || null, provider.createdAt || null, provider.updatedAt || null]
+      );
+    }
+    return;
+  }
+
+  if (name === "aiModels") {
+    for (const model of store.models || []) {
+      await pool.execute(
+        `INSERT INTO ai_models (id, provider_id, provider_model_id, title, family, modality, capabilities_json, status, source, context_window, cost_level, recommended_use, allowed_for_teachers, allowed_for_students, allowed_for_runtime, notes, created_at, updated_at, last_seen_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE title=VALUES(title), family=VALUES(family), modality=VALUES(modality), capabilities_json=VALUES(capabilities_json), status=VALUES(status), source=VALUES(source), context_window=VALUES(context_window), cost_level=VALUES(cost_level), recommended_use=VALUES(recommended_use), allowed_for_teachers=VALUES(allowed_for_teachers), allowed_for_students=VALUES(allowed_for_students), allowed_for_runtime=VALUES(allowed_for_runtime), notes=VALUES(notes), updated_at=VALUES(updated_at), last_seen_at=VALUES(last_seen_at)`,
+        [model.id, model.providerId, model.providerModelId, model.title, model.family || null, model.modality || null, json(model.capabilities || []), model.status || "available", model.source || null, model.contextWindow ?? null, model.costLevel || null, model.recommendedUse || null, model.allowedForTeachers ? 1 : 0, model.allowedForStudents ? 1 : 0, model.allowedForRuntime ? 1 : 0, model.notes || null, model.createdAt || null, model.updatedAt || null, model.lastSeenAt || null]
       );
     }
     return;

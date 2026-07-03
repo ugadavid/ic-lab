@@ -180,6 +180,7 @@ CREATE TABLE IF NOT EXISTS ai_configs (
   mode VARCHAR(128) NOT NULL,
   provider VARCHAR(128) NOT NULL,
   model_id VARCHAR(255) NULL,
+  model_catalog_id VARCHAR(128) NULL,
   voice_mode VARCHAR(128) NULL,
   voice_provider VARCHAR(128) NULL,
   estimated_cost_level VARCHAR(64) NULL,
@@ -198,7 +199,59 @@ CREATE TABLE IF NOT EXISTS ai_configs (
   updated_at VARCHAR(40) NULL,
   KEY idx_ai_configs_prototype (prototype_id),
   KEY idx_ai_configs_status (status),
-  KEY idx_ai_configs_mode (mode)
+  KEY idx_ai_configs_mode (mode),
+  KEY idx_ai_configs_model_catalog (model_catalog_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE ai_configs
+  ADD COLUMN IF NOT EXISTS model_catalog_id VARCHAR(128) NULL,
+  ADD KEY IF NOT EXISTS idx_ai_configs_model_catalog (model_catalog_id);
+
+CREATE TABLE IF NOT EXISTS ai_providers (
+  id VARCHAR(128) NOT NULL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  type VARCHAR(128) NOT NULL,
+  status VARCHAR(64) NOT NULL,
+  api_key_env_name VARCHAR(128) NULL,
+  base_url TEXT NULL,
+  supports_model_sync TINYINT(1) NOT NULL DEFAULT 0,
+  supports_text TINYINT(1) NOT NULL DEFAULT 0,
+  supports_audio TINYINT(1) NOT NULL DEFAULT 0,
+  supports_realtime TINYINT(1) NOT NULL DEFAULT 0,
+  supports_embeddings TINYINT(1) NOT NULL DEFAULT 0,
+  notes TEXT NULL,
+  created_at VARCHAR(40) NULL,
+  updated_at VARCHAR(40) NULL,
+  KEY idx_ai_providers_type (type),
+  KEY idx_ai_providers_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS ai_models (
+  id VARCHAR(128) NOT NULL PRIMARY KEY,
+  provider_id VARCHAR(128) NOT NULL,
+  provider_model_id VARCHAR(255) NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  family VARCHAR(128) NULL,
+  modality VARCHAR(128) NULL,
+  capabilities_json LONGTEXT NULL,
+  status VARCHAR(64) NOT NULL,
+  source VARCHAR(128) NULL,
+  context_window INT NULL,
+  cost_level VARCHAR(64) NULL,
+  recommended_use TEXT NULL,
+  allowed_for_teachers TINYINT(1) NOT NULL DEFAULT 0,
+  allowed_for_students TINYINT(1) NOT NULL DEFAULT 0,
+  allowed_for_runtime TINYINT(1) NOT NULL DEFAULT 0,
+  notes TEXT NULL,
+  created_at VARCHAR(40) NULL,
+  updated_at VARCHAR(40) NULL,
+  last_seen_at VARCHAR(40) NULL,
+  UNIQUE KEY uq_ai_models_provider_model (provider_id, provider_model_id),
+  KEY idx_ai_models_provider (provider_id),
+  KEY idx_ai_models_family (family),
+  KEY idx_ai_models_modality (modality),
+  KEY idx_ai_models_status (status),
+  KEY idx_ai_models_allowed_runtime (allowed_for_runtime)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS activity_ai_config (

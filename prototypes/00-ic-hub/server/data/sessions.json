@@ -329,6 +329,12 @@
       "userId": "user_admin_demo",
       "createdAt": "2026-07-02T17:51:56.578Z",
       "lastSeenAt": "2026-07-02T17:51:56.578Z"
+    },
+    {
+      "token": "fce993d8bf7fd85c7dec821b88cd8da718b5bb7e501a0252fcda23c7d135563c",
+      "userId": "user_admin_demo",
+      "createdAt": "2026-07-03T07:34:25.558Z",
+      "lastSeenAt": "2026-07-03T07:34:25.558Z"
     }
   ]
 }

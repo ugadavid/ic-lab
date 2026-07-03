@@ -28,6 +28,8 @@ async function main() {
       ownership: await scalar(connection, "SELECT COUNT(*) AS count FROM activity_ownership"),
       aiConfigs: await scalar(connection, "SELECT COUNT(*) AS count FROM ai_configs"),
       activityAiConfigs: await scalar(connection, "SELECT COUNT(*) AS count FROM activity_ai_config"),
+      aiProviders: await scalar(connection, "SELECT COUNT(*) AS count FROM ai_providers"),
+      aiModels: await scalar(connection, "SELECT COUNT(*) AS count FROM ai_models"),
       runs: await scalar(connection, "SELECT COUNT(*) AS count FROM runs"),
       runEvents: await scalar(connection, "SELECT COUNT(*) AS count FROM run_events")
     };
@@ -118,6 +120,8 @@ async function main() {
     console.log(`Ownership records: ${counts.ownership}`);
     console.log(`AI configs: ${counts.aiConfigs}`);
     console.log(`Activity AI config links: ${counts.activityAiConfigs}`);
+    console.log(`AI providers: ${counts.aiProviders}`);
+    console.log(`AI models: ${counts.aiModels}`);
     console.log(`Runs: ${counts.runs}`);
     console.log(`Run events: ${counts.runEvents}`);
     for (const item of issues) {

@@ -1,6 +1,6 @@
 {
   "version": "0.3.1",
-  "updatedAt": "2026-07-02T16:33:24.257Z",
+  "updatedAt": "2026-07-02T21:02:51.135Z",
   "runs": [
     {
       "id": "run_041dde51-8516-48d8-be16-ddd6bc3e4eb8",
@@ -133,6 +133,109 @@
             "activitySource": "catalog",
             "scenarioId": "globalUnderstanding",
             "characterCount": 3
+          }
+        }
+      ]
+    },
+    {
+      "id": "run_491eea42-308f-4f94-92be-8ad2687833f6",
+      "courseId": "course_463ad673-191d-4c27-ab8f-04ca82e9ae96",
+      "assignmentId": "assign_aa0ffdca-fd12-42c4-8f9a-478269d66242",
+      "prototypeId": "proto06",
+      "activityId": "climateObservations001",
+      "activitySource": "catalog",
+      "studentId": "user_student_demo",
+      "status": "started",
+      "createdAt": "2026-07-02T21:02:43.384Z",
+      "startedAt": "2026-07-02T21:02:51.135Z",
+      "completedAt": null,
+      "durationMs": null,
+      "launchTokenHash": "5381b517fcf7a21472d812b007a3546e65566df4e4606d26f5264c1e1efb7b51",
+      "events": [
+        {
+          "type": "proto_loaded",
+          "at": "2026-07-02T21:02:43.502Z",
+          "payload": {
+            "activityId": "climateObservations001",
+            "activitySource": "catalog",
+            "href": "http://127.0.0.1:8788/index-1.2.html?activityId=climateObservations001&activitySource=catalog&courseId=course_463ad673-191d-4c27-ab8f-04ca82e9ae96&assignmentId=assign_aa0ffdca-fd12-42c4-8f9a-478269d66242&runId=run_491eea42-308f-4f94-92be-8ad2687833f6&aiConfigId=aicfg_proto06_scripted_browser_voice"
+          }
+        },
+        {
+          "type": "activity_loaded",
+          "at": "2026-07-02T21:02:43.505Z",
+          "payload": {
+            "activityId": "climateObservations001",
+            "activitySource": "catalog",
+            "scenarioId": "globalUnderstanding",
+            "characterCount": 3
+          }
+        },
+        {
+          "type": "proto_loaded",
+          "at": "2026-07-02T21:02:43.517Z",
+          "payload": {
+            "activityId": "climateObservations001",
+            "activitySource": "catalog",
+            "href": "http://127.0.0.1:8788/index-1.2.html?activityId=climateObservations001&activitySource=catalog&courseId=course_463ad673-191d-4c27-ab8f-04ca82e9ae96&assignmentId=assign_aa0ffdca-fd12-42c4-8f9a-478269d66242&runId=run_491eea42-308f-4f94-92be-8ad2687833f6&aiConfigId=aicfg_proto06_scripted_browser_voice"
+          }
+        },
+        {
+          "type": "activity_loaded",
+          "at": "2026-07-02T21:02:43.519Z",
+          "payload": {
+            "activityId": "climateObservations001",
+            "activitySource": "catalog",
+            "scenarioId": "globalUnderstanding",
+            "characterCount": 3
+          }
+        },
+        {
+          "type": "ai_config_resolved",
+          "at": "2026-07-02T21:02:43.524Z",
+          "payload": {
+            "aiConfigId": "aicfg_proto06_scripted_browser_voice",
+            "status": "active",
+            "mode": "scripted",
+            "runtimeEnabled": false
+          }
+        },
+        {
+          "type": "agent_runtime_selected",
+          "at": "2026-07-02T21:02:43.532Z",
+          "payload": {
+            "assignedMode": "scripted",
+            "selectedRuntime": "scripted",
+            "fallback": false,
+            "generated": false
+          }
+        },
+        {
+          "type": "ai_config_resolved",
+          "at": "2026-07-02T21:02:43.547Z",
+          "payload": {
+            "aiConfigId": "aicfg_proto06_scripted_browser_voice",
+            "status": "active",
+            "mode": "scripted",
+            "runtimeEnabled": false
+          }
+        },
+        {
+          "type": "agent_runtime_selected",
+          "at": "2026-07-02T21:02:43.549Z",
+          "payload": {
+            "assignedMode": "scripted",
+            "selectedRuntime": "scripted",
+            "fallback": false,
+            "generated": false
+          }
+        },
+        {
+          "type": "meeting_started",
+          "at": "2026-07-02T21:02:51.135Z",
+          "payload": {
+            "activityId": "climateObservations001",
+            "activitySource": "catalog"
           }
         }
       ]

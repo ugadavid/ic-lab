@@ -19,7 +19,9 @@ const files = {
   institutions: "institutions.json",
   ownership: "activity-ownership.json",
   sharingSpaces: "sharing-spaces.json",
-  aiConfigs: "ai-configs.json"
+  aiConfigs: "ai-configs.json",
+  aiProviders: "ai-providers.json",
+  aiModels: "ai-models.json"
 };
 
 async function readJsonStore(name) {
@@ -39,6 +41,8 @@ async function readJsonStore(name) {
     if (name === "ownership") return { records: [] };
     if (name === "sharingSpaces") return { spaces: [] };
     if (name === "aiConfigs") return { configs: [], activityConfigs: [] };
+    if (name === "aiProviders") return { providers: [] };
+    if (name === "aiModels") return { models: [] };
     return {};
   }
 }
@@ -108,6 +112,8 @@ async function countRows() {
     "sharing_spaces",
     "ai_configs",
     "activity_ai_config",
+    "ai_providers",
+    "ai_models",
     "runs",
     "run_events"
   ];
@@ -145,7 +151,9 @@ async function main() {
       institutions: stores.institutions.institutions?.length || 0,
       ownership: stores.ownership.records?.length || 0,
       runs: stores.runs.runs?.length || 0,
-      aiConfigs: stores.aiConfigs.configs?.length || 0
+      aiConfigs: stores.aiConfigs.configs?.length || 0,
+      aiProviders: stores.aiProviders.providers?.length || 0,
+      aiModels: stores.aiModels.models?.length || 0
     }, null, 2));
     return;
   }
@@ -160,6 +168,8 @@ async function main() {
     "assignments",
     "ownership",
     "sharingSpaces",
+    "aiProviders",
+    "aiModels",
     "aiConfigs",
     "runs"
   ];

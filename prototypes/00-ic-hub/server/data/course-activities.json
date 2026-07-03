@@ -141,6 +141,32 @@
       "visibility": "course",
       "createdAt": "2026-07-02T16:07:59.528Z",
       "aiConfigId": "aicfg_proto06_scripted_browser_voice"
+    },
+    {
+      "id": "assign_0446e2e5-5478-4702-a94d-2489850983ff",
+      "courseId": "course_demo_repli4c",
+      "prototypeId": "proto06",
+      "activityId": "climateObservations001",
+      "activitySource": "server",
+      "activityTitle": "Tester que le créateur d'activité fonctionne",
+      "activitySnapshot": {
+        "title": "Tester que le créateur d'activité fonctionne",
+        "pedagogicalGoal": "Reconstruire les phénomènes climatiques évoqués dans plusieurs témoignages romans.",
+        "scenarioId": "globalUnderstanding",
+        "characterIds": [
+          "clara",
+          "marco",
+          "ana"
+        ]
+      },
+      "assignedBy": "user_teacher_demo",
+      "createdBy": "user_teacher_demo",
+      "updatedBy": "user_teacher_demo",
+      "institutionId": "inst_uga",
+      "visibility": "course",
+      "aiConfigId": "aicfg_proto06_scripted_browser_voice",
+      "createdAt": "2026-07-02T21:02:21.404Z",
+      "updatedAt": "2026-07-02T21:02:21.404Z"
     }
   ]
 }

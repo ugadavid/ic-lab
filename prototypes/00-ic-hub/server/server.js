@@ -1,14 +1,38 @@
 const http = require("node:http");
+const fsSync = require("node:fs");
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const crypto = require("node:crypto");
+const openAiModels = require("./ai/openaiModels");
 
 const PORT = Number(process.env.PORT || 8790);
-const VERSION = "0.7.3";
+const VERSION = "0.8";
 const SERVICE = "ic-hub-local";
 const ROOT_DIR = path.resolve(__dirname, "..");
 const PUBLIC_DIR = path.join(ROOT_DIR, "public");
 const DATA_DIR = path.join(__dirname, "data");
+const WORKSPACE_DIR = path.resolve(ROOT_DIR, "..", "..");
+
+function loadRootEnv() {
+  const envPath = path.join(WORKSPACE_DIR, ".env");
+  if (!fsSync.existsSync(envPath)) return;
+  const raw = fsSync.readFileSync(envPath, "utf8");
+  for (const line of raw.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const index = trimmed.indexOf("=");
+    if (index <= 0) continue;
+    const key = trimmed.slice(0, index).trim();
+    let value = trimmed.slice(index + 1).trim();
+    if ((value.startsWith("\"") && value.endsWith("\"")) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    if (!process.env[key]) process.env[key] = value;
+  }
+}
+
+loadRootEnv();
+
 const STORE_MODE = (process.env.IC_HUB_STORE || "json").toLowerCase();
 let mariaDbStore = null;
 let mariaDbAvailable = false;
@@ -25,7 +49,9 @@ const stores = {
   institutions: "institutions.json",
   ownership: "activity-ownership.json",
   sharingSpaces: "sharing-spaces.json",
-  aiConfigs: "ai-configs.json"
+  aiConfigs: "ai-configs.json",
+  aiProviders: "ai-providers.json",
+  aiModels: "ai-models.json"
 };
 
 const jsonWriteQueues = new Map();
@@ -242,6 +268,14 @@ const defaultStores = {
     ],
     activityConfigs: []
   },
+  aiProviders: {
+    version: "0.8",
+    providers: []
+  },
+  aiModels: {
+    version: "0.8",
+    models: []
+  },
   prototypes: {
     prototypes: [
       {
@@ -453,6 +487,7 @@ function normalizeAiConfig(input, existing = null) {
     mode: String(input.mode ?? existing?.mode ?? "scripted").trim(),
     provider: String(input.provider ?? existing?.provider ?? "none").trim(),
     modelId: input.modelId === undefined ? (existing?.modelId ?? null) : (input.modelId ? String(input.modelId).trim() : null),
+    modelCatalogId: input.modelCatalogId === undefined ? (existing?.modelCatalogId ?? null) : (input.modelCatalogId ? String(input.modelCatalogId).trim() : null),
     voiceMode: String(input.voiceMode ?? existing?.voiceMode ?? "none").trim(),
     voiceProvider: String(input.voiceProvider ?? existing?.voiceProvider ?? "none").trim(),
     estimatedCostLevel: aiCostLevels.has(input.estimatedCostLevel) ? input.estimatedCostLevel : (existing?.estimatedCostLevel || "free"),
@@ -471,6 +506,74 @@ function normalizeAiConfig(input, existing = null) {
     warnings: normalizeWarnings(input.warnings ?? existing?.warnings ?? []),
     createdAt: existing?.createdAt || input.createdAt || stamp,
     updatedAt: stamp
+  };
+}
+
+function normalizeAiProvider(input, existing = null) {
+  const stamp = now();
+  const idValue = String(input.id || existing?.id || id("provider")).trim();
+  return {
+    id: idValue,
+    title: String(input.title ?? existing?.title ?? idValue).trim(),
+    type: String(input.type ?? existing?.type ?? idValue).trim(),
+    status: String(input.status ?? existing?.status ?? "planned").trim(),
+    apiKeyEnvName: String(input.apiKeyEnvName ?? existing?.apiKeyEnvName ?? "").trim(),
+    baseUrl: String(input.baseUrl ?? existing?.baseUrl ?? "").trim(),
+    supportsModelSync: Boolean(input.supportsModelSync ?? existing?.supportsModelSync ?? false),
+    supportsText: Boolean(input.supportsText ?? existing?.supportsText ?? false),
+    supportsAudio: Boolean(input.supportsAudio ?? existing?.supportsAudio ?? false),
+    supportsRealtime: Boolean(input.supportsRealtime ?? existing?.supportsRealtime ?? false),
+    supportsEmbeddings: Boolean(input.supportsEmbeddings ?? existing?.supportsEmbeddings ?? false),
+    notes: String(input.notes ?? existing?.notes ?? "").trim(),
+    createdAt: existing?.createdAt || input.createdAt || stamp,
+    updatedAt: stamp
+  };
+}
+
+function normalizeAiModel(input, existing = null) {
+  const stamp = now();
+  const providerModelId = String(input.providerModelId ?? existing?.providerModelId ?? "").trim();
+  const idValue = String(input.id || existing?.id || `model_${providerModelId || crypto.randomUUID()}`).replace(/[^a-zA-Z0-9_]/g, "_");
+  return {
+    id: idValue,
+    providerId: String(input.providerId ?? existing?.providerId ?? "openai").trim(),
+    providerModelId,
+    title: String(input.title ?? existing?.title ?? (providerModelId || idValue)).trim(),
+    family: String(input.family ?? existing?.family ?? "").trim(),
+    modality: String(input.modality ?? existing?.modality ?? "text").trim(),
+    capabilities: Array.isArray(input.capabilities)
+      ? input.capabilities.map((item) => String(item).trim()).filter(Boolean)
+      : (existing?.capabilities || []),
+    status: String(input.status ?? existing?.status ?? "available").trim(),
+    source: String(input.source ?? existing?.source ?? "manual").trim(),
+    contextWindow: Number.isFinite(Number(input.contextWindow ?? existing?.contextWindow))
+      ? Math.max(0, Math.round(Number(input.contextWindow ?? existing?.contextWindow)))
+      : null,
+    costLevel: String(input.costLevel ?? existing?.costLevel ?? "unknown").trim(),
+    recommendedUse: String(input.recommendedUse ?? existing?.recommendedUse ?? "").trim(),
+    allowedForTeachers: Boolean(input.allowedForTeachers ?? existing?.allowedForTeachers ?? false),
+    allowedForStudents: Boolean(input.allowedForStudents ?? existing?.allowedForStudents ?? false),
+    allowedForRuntime: Boolean(input.allowedForRuntime ?? existing?.allowedForRuntime ?? false),
+    notes: String(input.notes ?? existing?.notes ?? "").trim(),
+    createdAt: existing?.createdAt || input.createdAt || stamp,
+    updatedAt: stamp,
+    lastSeenAt: input.lastSeenAt ?? existing?.lastSeenAt ?? null
+  };
+}
+
+function publicAiProvider(provider) {
+  const status = provider.type === "openai" ? openAiModels.getOpenAiProviderStatus(provider) : {
+    id: provider.id,
+    status: provider.status,
+    hasApiKey: Boolean(provider.apiKeyEnvName && process.env[provider.apiKeyEnvName]),
+    hasDefaultModel: false,
+    supportsModelSync: Boolean(provider.supportsModelSync)
+  };
+  return {
+    ...provider,
+    hasApiKey: Boolean(status.hasApiKey),
+    hasDefaultModel: Boolean(status.hasDefaultModel),
+    providerActivable: provider.status === "active" && (!provider.apiKeyEnvName || Boolean(status.hasApiKey))
   };
 }
 
@@ -1276,6 +1379,7 @@ function publicRuntimeAiConfig(config) {
     mode: config.mode,
     provider: config.provider,
     modelId: config.modelId ?? null,
+    modelCatalogId: config.modelCatalogId ?? null,
     voiceMode: config.voiceMode,
     voiceProvider: config.voiceProvider,
     estimatedCostLevel: config.estimatedCostLevel,
@@ -1936,6 +2040,118 @@ async function handleAiConfigs(request, response, url, user) {
   return false;
 }
 
+async function handleAdminAi(request, response, url, user) {
+  if (!url.pathname.startsWith("/api/admin/ai")) return false;
+  if (!requireRole(response, user, ["admin"])) return true;
+  const parts = url.pathname.split("/").filter(Boolean);
+
+  if (request.method === "GET" && url.pathname === "/api/admin/ai/status") {
+    const providersStore = await readJson("aiProviders");
+    const providers = (providersStore.providers || []).map(publicAiProvider).map((provider) => ({
+      id: provider.id,
+      status: provider.status,
+      hasApiKey: provider.hasApiKey,
+      hasDefaultModel: provider.hasDefaultModel,
+      supportsModelSync: provider.supportsModelSync,
+      providerActivable: provider.providerActivable
+    }));
+    return sendJson(response, 200, { providers });
+  }
+
+  if (request.method === "GET" && url.pathname === "/api/admin/ai/providers") {
+    const store = await readJson("aiProviders");
+    return sendJson(response, 200, {
+      version: store.version || "0.8",
+      providers: (store.providers || []).map(publicAiProvider)
+    });
+  }
+
+  if (request.method === "GET" && url.pathname === "/api/admin/ai/models") {
+    const store = await readJson("aiModels");
+    return sendJson(response, 200, {
+      version: store.version || "0.8",
+      models: Array.isArray(store.models) ? store.models : []
+    });
+  }
+
+  if (request.method === "POST" && url.pathname === "/api/admin/ai/providers/openai/sync-models") {
+    try {
+      const result = await openAiModels.syncOpenAiModels({
+        readModelsStore: () => readJson("aiModels"),
+        writeModelsStore: (store) => writeJson("aiModels", store),
+        now
+      });
+      return sendJson(response, 200, {
+        ok: true,
+        syncedCount: result.syncedCount,
+        totalModels: result.totalModels,
+        models: result.models
+      });
+    } catch (error) {
+      const status = error.code === "OPENAI_API_KEY_MISSING" ? 400 : 502;
+      console.error(`[admin-ai] OpenAI sync failed status=${status}`);
+      return sendJson(response, status, { error: error.message });
+    }
+  }
+
+  if (request.method === "PUT" && parts.length === 5 && parts[3] === "providers") {
+    const providerId = decodeURIComponent(parts[4]);
+    const body = await readBody(request);
+    return withJsonWriteLock("aiProviders", async () => {
+      const store = await readJson("aiProviders");
+      store.version = "0.8";
+      store.providers = Array.isArray(store.providers) ? store.providers : [];
+      const index = store.providers.findIndex((provider) => provider.id === providerId);
+      if (index === -1) return sendJson(response, 404, { error: "Provider IA introuvable." });
+      const existing = store.providers[index];
+      const next = normalizeAiProvider({
+        ...existing,
+        title: body.title ?? existing.title,
+        status: body.status ?? existing.status,
+        baseUrl: body.baseUrl ?? existing.baseUrl,
+        supportsModelSync: body.supportsModelSync ?? existing.supportsModelSync,
+        supportsText: body.supportsText ?? existing.supportsText,
+        supportsAudio: body.supportsAudio ?? existing.supportsAudio,
+        supportsRealtime: body.supportsRealtime ?? existing.supportsRealtime,
+        supportsEmbeddings: body.supportsEmbeddings ?? existing.supportsEmbeddings,
+        notes: body.notes ?? existing.notes
+      }, existing);
+      store.providers[index] = next;
+      await writeJson("aiProviders", store);
+      return sendJson(response, 200, { provider: publicAiProvider(next) });
+    });
+  }
+
+  if (request.method === "PUT" && parts.length === 5 && parts[3] === "models") {
+    const modelId = decodeURIComponent(parts[4]);
+    const body = await readBody(request);
+    return withJsonWriteLock("aiModels", async () => {
+      const store = await readJson("aiModels");
+      store.version = "0.8";
+      store.models = Array.isArray(store.models) ? store.models : [];
+      const index = store.models.findIndex((model) => model.id === modelId);
+      if (index === -1) return sendJson(response, 404, { error: "Modele IA introuvable." });
+      const existing = store.models[index];
+      const next = normalizeAiModel({
+        ...existing,
+        title: body.title ?? existing.title,
+        status: body.status ?? existing.status,
+        costLevel: body.costLevel ?? existing.costLevel,
+        recommendedUse: body.recommendedUse ?? existing.recommendedUse,
+        allowedForTeachers: body.allowedForTeachers ?? existing.allowedForTeachers,
+        allowedForStudents: body.allowedForStudents ?? existing.allowedForStudents,
+        allowedForRuntime: body.allowedForRuntime ?? existing.allowedForRuntime,
+        notes: body.notes ?? existing.notes
+      }, existing);
+      store.models[index] = next;
+      await writeJson("aiModels", store);
+      return sendJson(response, 200, { model: next });
+    });
+  }
+
+  return false;
+}
+
 async function handleCourseActivityAiConfig(request, response, url, user) {
   const match = url.pathname.match(/^\/api\/course-activities\/([^/]+)\/ai-config$/);
   if (!match) return false;
@@ -2047,6 +2263,11 @@ async function handleApi(request, response, url) {
     if (handled !== false) return;
   }
 
+  if (url.pathname.startsWith("/api/admin/ai")) {
+    const handled = await handleAdminAi(request, response, url, user);
+    if (handled !== false) return;
+  }
+
   if (url.pathname.startsWith("/api/runs")) {
     const handled = await handleRuns(request, response, url, user);
     if (handled !== false) return;
@@ -2086,8 +2307,8 @@ async function serveStatic(response, url) {
   const redirects = new Map([
     ["/student.html", "/student-0.7.1.html"],
     ["/teacher.html", "/teacher-0.7.1.html"],
-    ["/hub.html", "/hub-0.7.1.html"],
-    ["/admin.html", "/admin-0.7.1.html"]
+    ["/hub.html", "/hub-0.8.html"],
+    ["/admin.html", "/admin-0.8.html"]
   ]);
   if (redirects.has(url.pathname)) {
     response.writeHead(302, { location: redirects.get(url.pathname) });
