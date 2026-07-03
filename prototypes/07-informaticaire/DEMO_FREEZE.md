@@ -1,10 +1,10 @@
-# Gel démo - Informaticaire v0.6.1
+# Gel démo - Informaticaire v0.6.3
 
 ## Version gelée
 
-Version gelée pour démonstration : **v0.6.1**.
+Version gelée pour démonstration : **v0.6.3**.
 
-Cette version correspond à l'état v0.6 démontrable, consolidé par le hotfix recherche/alias v0.6.1.
+Cette version correspond à l'état v0.6 démontrable, consolidé par le hotfix recherche/alias v0.6.1, le registre acteurs v0.6.2 et la fusion Sandra Garbarino v0.6.3.
 
 ## Objectif du prototype
 
@@ -23,6 +23,9 @@ Il aide à :
 La version gelée contient :
 
 - 42 fiches documentées ;
+- 32 fiches acteurs dans le registre ;
+- les 15 personnes interviewées représentées dans les fiches acteurs ;
+- une fiche unique `Sandra Garbarino`, à la fois interviewée et citée ;
 - une recherche robuste avec alias et variantes de noms ;
 - des filtres par type, statut et public ;
 - des fiches détaillées en modale ;
@@ -53,28 +56,32 @@ La version gelée contient :
 3. Utiliser `Découvrir Informaticaire en 5 étapes`.
 4. Lancer `Démo rapide` avec le parcours Galanet.
 5. Montrer la fiche détaillée Galanet : historique, relations, état, récupération, personnes/projets liés.
-6. Chercher `EuRom 5` puis `EuRom5` pour montrer le hotfix recherche/alias.
-7. Montrer un filtre par public ou par type.
-8. Montrer `Ressources à sauver ensemble`.
-9. Montrer le formulaire `Contribuer` et expliquer que la contribution reste locale et relue humainement.
-10. Finir par `Ce prototype n'est pas encore...` et `Prochaines décisions communautaires`.
+6. Cliquer sur le filtre `Acteurs` pour montrer le registre communautaire.
+7. Rechercher `Sandra`, puis `Sandra Garbarino`, pour montrer la fusion en une fiche unique interviewée et citée.
+8. Rechercher `JP`, `Kátia` et `Louise Dabène` pour montrer les alias, les interviewés et les acteurs historiques.
+9. Chercher `EuRom 5` pour montrer le hotfix recherche/alias.
+10. Montrer un filtre par public ou par type.
+11. Montrer `Ressources à sauver ensemble`.
+12. Montrer le formulaire `Contribuer` et expliquer que la contribution reste locale et relue humainement.
+13. Finir par `Ce prototype n'est pas encore...` et `Prochaines décisions communautaires`.
 
 ## Recherches de test à vérifier avant présentation
 
 Avant une présentation, vérifier rapidement que ces recherches retournent une fiche pertinente :
 
+- `Sandra`
+- `Sandra Garbarino`
+- `Garbarino`
+- `Christian`
+- `Kátia`
+- `JP`
+- `Chavagne`
+- `Hugues`
+- `Louise Dabène`
+- `Claire Blanche-Benveniste`
 - `EuRom 5`
 - `EuRom5`
-- `eurom web`
-- `GalaNet`
-- `GalaPro`
-- `Myriadi`
-- `Miriadi`
-- `Romanophonie`
-- `Romanofonía`
-- `Repli4C`
-- `Reply for C`
-- `Iplera`
+- `Galanet`
 
 ## Points forts
 

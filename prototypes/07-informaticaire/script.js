@@ -35,6 +35,12 @@ const itemSearchText = (item) =>
     item.period,
     item.description,
     ...(item.aliases || []),
+    item.actorKind,
+    ...(item.domains || []),
+    ...(item.affiliations || []),
+    ...(item.mentionedProjects || []),
+    ...(item.mentionedResources || []),
+    ...(item.citedBy || []),
     ...(item.tags || []),
     ...(item.actors || []),
     ...(item.interviews || []),
@@ -106,6 +112,48 @@ const escapeHtml = (value) =>
     .replace(/"/g, "&quot;");
 
 const listOrFallback = (values, fallback = "à compléter") => (values?.length ? values.join(", ") : fallback);
+
+const isActorItem = (item) => ["acteur", "acteur collectif", "institution"].includes(item.type);
+
+const actorStatusPills = (item) => {
+  if (!isActorItem(item)) return "";
+  const labels = [];
+  if (item.actorKind?.includes("interviewée et citée")) labels.push("Interviewé + cité");
+  else if (item.actorKind?.includes("interviewée")) labels.push("Interviewé");
+  else if (item.actorKind?.includes("citée")) labels.push("Cité");
+  if (item.actorKind?.includes("institution")) labels.push("Collectif");
+  if (item.confidence === "à vérifier" || item.sourceStatus?.includes("vérifier") || item.uncertain) labels.push("À vérifier");
+  return labels.map((label) => pill(label)).join("");
+};
+
+const renderActorCardDetails = (item) => {
+  if (!isActorItem(item)) return "";
+  return `
+    <div class="detail-group">
+      <strong>Rôle / domaine</strong>
+      <span>${listOrFallback(item.domains, item.period || "à compléter")}</span>
+    </div>
+    <div class="detail-group">
+      <strong>Projets cités</strong>
+      <span>${listOrFallback(item.mentionedProjects, listOrFallback(item.tags, "à compléter"))}</span>
+    </div>
+  `;
+};
+
+const renderActorDetail = (item) => {
+  if (!isActorItem(item)) return "";
+  return `
+    <div class="detail-card">
+      <div class="detail-group"><strong>Registre acteur</strong><span>${item.actorKind || "acteur à documenter"}</span></div>
+      <div class="mini-list">${actorStatusPills(item)}</div>
+      <div class="detail-group"><strong>Domaines</strong><span>${listOrFallback(item.domains)}</span></div>
+      <div class="detail-group"><strong>Affiliations</strong><span>${listOrFallback(item.affiliations)}</span></div>
+      <div class="detail-group"><strong>Projets mentionnés</strong><span>${listOrFallback(item.mentionedProjects)}</span></div>
+      <div class="detail-group"><strong>Ressources mentionnées</strong><span>${listOrFallback(item.mentionedResources)}</span></div>
+      <div class="detail-group"><strong>Cité par</strong><span>${listOrFallback(item.citedBy)}</span></div>
+    </div>
+  `;
+};
 
 const renderRelatedLinks = (item) => {
   const lookup = itemById();
@@ -247,6 +295,7 @@ const renderCards = () => {
           <div class="card-meta">
             ${pill(item.type, "type")}
             ${pill(item.status, slugStatus(item.status))}
+            ${actorStatusPills(item)}
             ${item.uncertain ? pill("à confirmer") : ""}
           </div>
           <h3>${item.title}</h3>
@@ -257,6 +306,7 @@ const renderCards = () => {
             ${pill(item.accessStatus || "à vérifier")}
             ${pill(item.licenseStatus || "inconnu")}
           </div>
+          ${renderActorCardDetails(item)}
           <div class="detail-group">
             <strong>Acteurs liés</strong>
             <span>${(item.actors || []).join(", ") || "à compléter"}</span>
@@ -383,6 +433,7 @@ const openDetail = (itemId) => {
         ${pill(item.type, "type")}
         ${pill(item.status, slugStatus(item.status))}
         ${pill(item.status || "état à préciser")}
+        ${actorStatusPills(item)}
         ${item.communityPriority ? pill(`Priorité ${item.communityPriority}`) : ""}
       </div>
       <h2 id="detail-title">${item.title}</h2>
@@ -394,6 +445,7 @@ const openDetail = (itemId) => {
         <div class="detail-group"><strong>À quoi ça sert ?</strong><span>${item.communityUse || item.description}</span></div>
         <div class="detail-group"><strong>Pour qui ?</strong><span>${listOrFallback(audience)}</span></div>
       </div>
+      ${renderActorDetail(item)}
       <div class="detail-card">
         <div class="detail-group"><strong>Comment réutiliser ?</strong><span>${item.reuseHint || "S'en servir comme repère, source d'inspiration ou point de départ pour documenter une ressource liée."}</span></div>
         <div class="detail-group"><strong>Contribuer</strong><span>${item.contributionHint || "Ajouter liens, captures, responsables, variantes ou informations de disponibilité."}</span></div>
