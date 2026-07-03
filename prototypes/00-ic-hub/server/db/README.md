@@ -1,6 +1,6 @@
-# IC-Lab Hub V0.7 - MariaDB
+# IC-Lab Hub V0.8.1 - MariaDB
 
-Cette couche MariaDB est experimentale mais durcie jusqu'a la V0.7. Le mode JSON reste le mode par defaut et les fichiers JSON ne sont pas supprimes.
+Cette couche MariaDB est experimentale mais durcie jusqu'a la V0.8.1. Le mode JSON reste le mode par defaut et les fichiers JSON ne sont pas supprimes.
 
 ## Prerequis
 
@@ -54,6 +54,8 @@ Le script :
 - ne fait pas de `DROP TABLE` et ne supprime pas les fichiers JSON.
 
 La V0.7 migre aussi `data/ai-configs.json` vers `ai_configs` et `activity_ai_config`.
+
+La V0.8 migre le catalogue providers/modeles IA depuis `data/ai-providers.json` et `data/ai-models.json`. La V0.8.1 enrichit ces modeles avec `data/ai-model-metadata.json` avant ecriture MariaDB, afin de renseigner descriptions courtes, recommandation IC-Lab, prix connus ou a completer, source tarifaire et date de verification.
 
 ## Procedures stockees
 
@@ -111,6 +113,17 @@ Les profils seedes pour `proto06` couvrent :
 - multi-agents experimental.
 
 Les couts restent qualitatifs : `free`, `low`, `medium`, `high`, `very-high`.
+
+## Catalogue modeles IA
+
+La V0.8.1 ajoute des metadonnees non secretes au catalogue `ai_models` :
+
+- `short_description` : resume admin lisible;
+- `ic_lab_recommendation` : statut d'usage IC-Lab/Proto06;
+- `pricing_json` et colonnes tarifaires (`input_price_usd`, `cached_input_price_usd`, `output_price_usd`, `pricing_unit`, `pricing_source`, `pricing_last_checked_at`);
+- enrichissement heuristique local pour famille, modalite, capacites, cout qualitatif et usage recommande.
+
+Les prix inconnus restent explicitement `null` avec une source `manual_review_required` ou un affichage "Prix non renseigne". Aucun prix n'est invente par le hub.
 
 En V0.7.1, l'association prioritaire se fait au niveau de l'assignation (`course_activities.ai_config_id`) afin qu'une meme activite puisse etre scenarisee dans un cours et associee a un mode IA futur dans un autre. La table `activity_ai_config` reste disponible pour une evolution plus fine.
 

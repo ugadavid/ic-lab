@@ -335,6 +335,7 @@ async function readStore(name) {
         providerId: row.provider_id,
         providerModelId: row.provider_model_id,
         title: row.title,
+        shortDescription: row.short_description || "",
         family: row.family || "",
         modality: row.modality || "",
         capabilities: parseJson(row.capabilities_json, []),
@@ -342,6 +343,15 @@ async function readStore(name) {
         source: row.source || "",
         contextWindow: row.context_window,
         costLevel: row.cost_level || "",
+        icLabRecommendation: row.ic_lab_recommendation || "",
+        pricing: parseJson(row.pricing_json, {
+          unit: row.pricing_unit || "",
+          inputUsd: row.input_price_usd === null ? null : Number(row.input_price_usd),
+          cachedInputUsd: row.cached_input_price_usd === null ? null : Number(row.cached_input_price_usd),
+          outputUsd: row.output_price_usd === null ? null : Number(row.output_price_usd),
+          source: row.pricing_source || "",
+          lastCheckedAt: row.pricing_last_checked_at || null
+        }),
         recommendedUse: row.recommended_use || "",
         allowedForTeachers: Boolean(row.allowed_for_teachers),
         allowedForStudents: Boolean(row.allowed_for_students),
@@ -630,11 +640,12 @@ async function writeStore(name, store) {
 
   if (name === "aiModels") {
     for (const model of store.models || []) {
+      const pricing = model.pricing || {};
       await pool.execute(
-        `INSERT INTO ai_models (id, provider_id, provider_model_id, title, family, modality, capabilities_json, status, source, context_window, cost_level, recommended_use, allowed_for_teachers, allowed_for_students, allowed_for_runtime, notes, created_at, updated_at, last_seen_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE title=VALUES(title), family=VALUES(family), modality=VALUES(modality), capabilities_json=VALUES(capabilities_json), status=VALUES(status), source=VALUES(source), context_window=VALUES(context_window), cost_level=VALUES(cost_level), recommended_use=VALUES(recommended_use), allowed_for_teachers=VALUES(allowed_for_teachers), allowed_for_students=VALUES(allowed_for_students), allowed_for_runtime=VALUES(allowed_for_runtime), notes=VALUES(notes), updated_at=VALUES(updated_at), last_seen_at=VALUES(last_seen_at)`,
-        [model.id, model.providerId, model.providerModelId, model.title, model.family || null, model.modality || null, json(model.capabilities || []), model.status || "available", model.source || null, model.contextWindow ?? null, model.costLevel || null, model.recommendedUse || null, model.allowedForTeachers ? 1 : 0, model.allowedForStudents ? 1 : 0, model.allowedForRuntime ? 1 : 0, model.notes || null, model.createdAt || null, model.updatedAt || null, model.lastSeenAt || null]
+        `INSERT INTO ai_models (id, provider_id, provider_model_id, title, short_description, family, modality, capabilities_json, status, source, context_window, cost_level, ic_lab_recommendation, recommended_use, pricing_json, input_price_usd, cached_input_price_usd, output_price_usd, pricing_unit, pricing_source, pricing_last_checked_at, allowed_for_teachers, allowed_for_students, allowed_for_runtime, notes, created_at, updated_at, last_seen_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE title=VALUES(title), short_description=VALUES(short_description), family=VALUES(family), modality=VALUES(modality), capabilities_json=VALUES(capabilities_json), status=VALUES(status), source=VALUES(source), context_window=VALUES(context_window), cost_level=VALUES(cost_level), ic_lab_recommendation=VALUES(ic_lab_recommendation), recommended_use=VALUES(recommended_use), pricing_json=VALUES(pricing_json), input_price_usd=VALUES(input_price_usd), cached_input_price_usd=VALUES(cached_input_price_usd), output_price_usd=VALUES(output_price_usd), pricing_unit=VALUES(pricing_unit), pricing_source=VALUES(pricing_source), pricing_last_checked_at=VALUES(pricing_last_checked_at), allowed_for_teachers=VALUES(allowed_for_teachers), allowed_for_students=VALUES(allowed_for_students), allowed_for_runtime=VALUES(allowed_for_runtime), notes=VALUES(notes), updated_at=VALUES(updated_at), last_seen_at=VALUES(last_seen_at)`,
+        [model.id, model.providerId, model.providerModelId, model.title, model.shortDescription || null, model.family || null, model.modality || null, json(model.capabilities || []), model.status || "available", model.source || null, model.contextWindow ?? null, model.costLevel || null, model.icLabRecommendation || null, model.recommendedUse || null, json(pricing), pricing.inputUsd ?? null, pricing.cachedInputUsd ?? null, pricing.outputUsd ?? null, pricing.unit || null, pricing.source || null, pricing.lastCheckedAt || null, model.allowedForTeachers ? 1 : 0, model.allowedForStudents ? 1 : 0, model.allowedForRuntime ? 1 : 0, model.notes || model.adminNotes || null, model.createdAt || null, model.updatedAt || null, model.lastSeenAt || null]
       );
     }
     return;

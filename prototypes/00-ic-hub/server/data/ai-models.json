@@ -1,12 +1,13 @@
 {
   "version": "0.8",
-  "updatedAt": "2026-07-03T07:18:53.143Z",
+  "updatedAt": "2026-07-03T08:19:08.564Z",
   "models": [
     {
       "id": "openai_babbage_002",
       "providerId": "openai",
       "providerModelId": "babbage-002",
       "title": "babbage-002",
+      "shortDescription": "Modele texte synchronise depuis le provider, a evaluer avant usage pedagogique.",
       "family": "babbage-002",
       "modality": "text",
       "capabilities": [
@@ -16,14 +17,24 @@
       "source": "openai-sync",
       "contextWindow": null,
       "costLevel": "unknown",
-      "recommendedUse": "",
+      "icLabRecommendation": "not_recommended",
+      "pricing": {
+        "unit": "",
+        "inputUsd": null,
+        "cachedInputUsd": null,
+        "outputUsd": null,
+        "source": "",
+        "lastCheckedAt": ""
+      },
+      "recommendedUse": "Usage texte a evaluer avant toute activation.",
       "allowedForTeachers": false,
       "allowedForStudents": false,
       "allowedForRuntime": false,
       "notes": "",
+      "adminNotes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z"
     },
     {
       "id": "openai_chat_latest",
@@ -45,8 +56,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_chatgpt_image_latest",
@@ -68,8 +83,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_davinci_002",
@@ -91,8 +110,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_3_5_turbo",
@@ -114,8 +137,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_3_5_turbo_0125",
@@ -137,8 +164,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_3_5_turbo_1106",
@@ -160,8 +191,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_3_5_turbo_16k",
@@ -183,8 +218,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_3_5_turbo_instruct",
@@ -206,8 +245,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_3_5_turbo_instruct_0914",
@@ -229,8 +272,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4",
@@ -252,8 +299,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4_0613",
@@ -275,8 +326,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4_turbo",
@@ -298,8 +353,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4_turbo_2024_04_09",
@@ -321,8 +380,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4_1",
@@ -344,8 +407,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4_1_2025_04_14",
@@ -367,8 +434,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4_1_mini",
@@ -390,8 +461,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4_1_mini_2025_04_14",
@@ -413,8 +488,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4_1_nano",
@@ -436,8 +515,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4_1_nano_2025_04_14",
@@ -459,8 +542,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4o",
@@ -482,8 +569,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4o_2024_05_13",
@@ -505,8 +596,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4o_2024_08_06",
@@ -528,8 +623,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4o_2024_11_20",
@@ -551,8 +650,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4o_mini",
@@ -574,8 +677,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4o_mini_2024_07_18",
@@ -597,8 +704,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4o_mini_search_preview",
@@ -620,8 +731,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4o_mini_search_preview_2025_03_11",
@@ -643,8 +758,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4o_mini_transcribe",
@@ -666,8 +785,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4o_mini_transcribe_2025_03_20",
@@ -689,8 +812,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4o_mini_transcribe_2025_12_15",
@@ -712,8 +839,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4o_mini_tts",
@@ -735,8 +866,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4o_mini_tts_2025_03_20",
@@ -758,8 +893,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4o_mini_tts_2025_12_15",
@@ -781,8 +920,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4o_search_preview",
@@ -804,8 +947,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4o_search_preview_2025_03_11",
@@ -827,8 +974,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4o_transcribe",
@@ -850,8 +1001,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_4o_transcribe_diarize",
@@ -873,8 +1028,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5",
@@ -896,8 +1055,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_2025_08_07",
@@ -919,8 +1082,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_chat_latest",
@@ -942,8 +1109,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_codex",
@@ -965,8 +1136,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_mini",
@@ -988,8 +1163,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_mini_2025_08_07",
@@ -1011,8 +1190,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_nano",
@@ -1034,8 +1217,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_nano_2025_08_07",
@@ -1057,8 +1244,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_pro",
@@ -1080,8 +1271,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_pro_2025_10_06",
@@ -1103,8 +1298,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_search_api",
@@ -1126,8 +1325,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_search_api_2025_10_14",
@@ -1149,8 +1352,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_1",
@@ -1172,8 +1379,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_1_2025_11_13",
@@ -1195,8 +1406,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_1_chat_latest",
@@ -1218,8 +1433,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_1_codex",
@@ -1241,8 +1460,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_1_codex_max",
@@ -1264,8 +1487,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_1_codex_mini",
@@ -1287,8 +1514,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_2",
@@ -1310,8 +1541,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_2_2025_12_11",
@@ -1333,8 +1568,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_2_chat_latest",
@@ -1356,8 +1595,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_2_codex",
@@ -1379,8 +1622,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_2_pro",
@@ -1402,8 +1649,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_2_pro_2025_12_11",
@@ -1425,8 +1676,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_3_chat_latest",
@@ -1448,8 +1703,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_3_codex",
@@ -1471,8 +1730,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_4",
@@ -1494,8 +1757,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_4_2026_03_05",
@@ -1517,8 +1784,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_4_mini",
@@ -1540,8 +1811,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_4_mini_2026_03_17",
@@ -1563,8 +1838,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_4_nano",
@@ -1586,8 +1865,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_4_nano_2026_03_17",
@@ -1609,8 +1892,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_4_pro",
@@ -1632,8 +1919,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_4_pro_2026_03_05",
@@ -1655,8 +1946,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_5",
@@ -1678,8 +1973,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_5_2026_04_23",
@@ -1701,8 +2000,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_5_pro",
@@ -1724,8 +2027,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_5_5_pro_2026_04_23",
@@ -1747,8 +2054,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_audio",
@@ -1770,8 +2081,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_audio_1_5",
@@ -1793,8 +2108,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_audio_2025_08_28",
@@ -1816,8 +2135,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_audio_mini",
@@ -1839,8 +2162,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_audio_mini_2025_10_06",
@@ -1862,8 +2189,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_audio_mini_2025_12_15",
@@ -1885,8 +2216,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_image_1",
@@ -1908,8 +2243,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_image_1_mini",
@@ -1931,8 +2270,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_image_1_5",
@@ -1954,8 +2297,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_image_2",
@@ -1977,8 +2324,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_image_2_2026_04_21",
@@ -2000,8 +2351,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_realtime",
@@ -2025,8 +2380,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_realtime_1_5",
@@ -2050,8 +2409,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_realtime_2",
@@ -2075,8 +2438,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_realtime_2025_08_28",
@@ -2100,8 +2467,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_realtime_mini",
@@ -2125,8 +2496,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_realtime_mini_2025_10_06",
@@ -2150,8 +2525,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_realtime_mini_2025_12_15",
@@ -2175,8 +2554,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_realtime_translate",
@@ -2200,8 +2583,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_gpt_realtime_whisper",
@@ -2225,8 +2612,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_o1",
@@ -2248,8 +2639,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_o1_2024_12_17",
@@ -2271,8 +2666,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_o1_pro",
@@ -2294,8 +2693,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_o1_pro_2025_03_19",
@@ -2317,8 +2720,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_o3",
@@ -2340,8 +2747,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_o3_2025_04_16",
@@ -2363,8 +2774,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_o3_mini",
@@ -2386,8 +2801,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_o3_mini_2025_01_31",
@@ -2409,8 +2828,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_o4_mini",
@@ -2432,8 +2855,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_o4_mini_2025_04_16",
@@ -2455,8 +2882,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_omni_moderation_2024_09_26",
@@ -2478,8 +2909,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_omni_moderation_latest",
@@ -2501,8 +2936,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_default_placeholder",
@@ -2547,8 +2986,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_sora_2_pro",
@@ -2570,8 +3013,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_text_embedding_3_large",
@@ -2593,8 +3040,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_text_embedding_3_small",
@@ -2616,8 +3067,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_text_embedding_ada_002",
@@ -2639,8 +3094,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_tts_1",
@@ -2662,8 +3121,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_tts_1_1106",
@@ -2685,8 +3148,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_tts_1_hd",
@@ -2708,8 +3175,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_tts_1_hd_1106",
@@ -2731,8 +3202,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     },
     {
       "id": "openai_whisper_1",
@@ -2754,8 +3229,12 @@
       "allowedForRuntime": false,
       "notes": "",
       "createdAt": "2026-07-03T07:18:53.143Z",
-      "updatedAt": "2026-07-03T07:18:53.143Z",
-      "lastSeenAt": "2026-07-03T07:18:53.143Z"
+      "updatedAt": "2026-07-03T08:19:08.564Z",
+      "lastSeenAt": "2026-07-03T08:19:08.564Z",
+      "shortDescription": "",
+      "icLabRecommendation": "",
+      "pricing": null,
+      "adminNotes": ""
     }
   ]
 }

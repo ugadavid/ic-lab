@@ -2,6 +2,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { getPool, testConnection, dbConfig } = require("./db");
 const mariaDbStore = require("../stores/mariadbStore");
+const modelMetadataEnrichment = require("../ai/modelMetadataEnrichment");
 
 const SERVER_DIR = path.resolve(__dirname, "..");
 const DATA_DIR = path.join(SERVER_DIR, "data");
@@ -21,7 +22,8 @@ const files = {
   sharingSpaces: "sharing-spaces.json",
   aiConfigs: "ai-configs.json",
   aiProviders: "ai-providers.json",
-  aiModels: "ai-models.json"
+  aiModels: "ai-models.json",
+  aiModelMetadata: "ai-model-metadata.json"
 };
 
 async function readJsonStore(name) {
@@ -43,6 +45,7 @@ async function readJsonStore(name) {
     if (name === "aiConfigs") return { configs: [], activityConfigs: [] };
     if (name === "aiProviders") return { providers: [] };
     if (name === "aiModels") return { models: [] };
+    if (name === "aiModelMetadata") return { metadata: [] };
     return {};
   }
 }
@@ -142,6 +145,7 @@ async function main() {
     ...assignment,
     aiConfigId: assignment.aiConfigId || (assignment.prototypeId === "proto06" ? DEFAULT_PROTO06_AI_CONFIG_ID : null)
   }));
+  stores.aiModels.models = modelMetadataEnrichment.enrichModels(stores.aiModels.models || [], stores.aiModelMetadata || {});
 
   if (dryRun) {
     console.log("[dry-run] no rows written.");
@@ -153,7 +157,8 @@ async function main() {
       runs: stores.runs.runs?.length || 0,
       aiConfigs: stores.aiConfigs.configs?.length || 0,
       aiProviders: stores.aiProviders.providers?.length || 0,
-      aiModels: stores.aiModels.models?.length || 0
+      aiModels: stores.aiModels.models?.length || 0,
+      aiModelMetadata: stores.aiModelMetadata.metadata?.length || 0
     }, null, 2));
     return;
   }

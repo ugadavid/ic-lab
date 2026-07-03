@@ -1,0 +1,254 @@
+# Guide mainteneur - Administration IA IC-Hub
+
+Date: 2026-07-03
+
+## Dernier etat valide
+
+- Hub : V0.8.4
+- Prototype 06 : V1.2
+- Mode Proto06 : runtime scenarise securise
+- IA generative dans les activites : non
+- Appels OpenAI depuis navigateur : non
+- Texte apprenant envoye a OpenAI : non
+- Cles visibles cote navigateur : non
+- Derniere validation : 2026-07-03
+
+Cet etat correspond a une plateforme prete pour tests administrateurs, mais sans activation IA dans les parcours apprenants.
+
+## Etat general
+
+Le Hub IC-Lab administre un catalogue de providers et de modeles IA, mais aucune IA generative n'est activee dans les parcours apprenants par ce seul catalogue.
+
+Prototype 06 reste en runtime scenarise tant qu'un runtime generatif n'est pas explicitement cree, teste cote serveur, puis branche dans le parcours apprenant apres validation.
+
+## Architecture IA du Hub
+
+La couche IA du Hub contient quatre niveaux :
+
+1. Providers : fournisseurs techniques comme OpenAI, Anthropic, Google, Mistral ou Ollama.
+2. Modeles : moteurs disponibles chez un provider.
+3. AIConfig : profil local qui decrit un mode IA/voix possible pour un prototype.
+4. Prototypes : applications pedagogiques comme Prototype 06, qui resolvent leur mode d'execution a partir de l'assignation et de l'AIConfig.
+
+Le catalogue providers/modeles prepare des choix futurs. Il ne lance pas d'appel de generation dans les activites.
+
+## Providers
+
+Un provider est un fournisseur technique. Le provider OpenAI peut etre synchronise cote serveur pour lire la liste des modeles accessibles avec la cle configuree localement.
+
+Les metadonnees provider modifiables dans l'admin sont locales :
+
+- titre;
+- statut;
+- Base URL;
+- notes.
+
+Modifier ces champs ne modifie pas le compte OpenAI.
+
+## Modeles
+
+Un modele est un moteur disponible chez un provider. Le Hub stocke :
+
+- id technique;
+- famille;
+- modalite;
+- description courte;
+- recommandation IC-Lab;
+- cout qualitatif;
+- prix renseignes ou non;
+- autorisations locales teacher/student/runtime.
+
+`allowedForRuntime` rend un modele selectionnable pour une future configuration. Cela n'active pas automatiquement l'IA dans Prototype 06.
+
+## AIConfig
+
+Une AIConfig est un profil local de mode IA/voix. Elle peut decrire :
+
+- un mode scenarise;
+- un futur mode texte;
+- un futur mode voix;
+- des limites de duree;
+- un niveau de cout;
+- des warnings.
+
+Une AIConfig peut pointer vers un modele catalogue avec `modelCatalogId`, mais cela reste une configuration administrative tant qu'aucun runtime generatif n'est branche dans le prototype.
+
+## Role de Prototype 06
+
+Prototype 06 utilise actuellement un runtime scenarise securise. Les activites peuvent remonter des traces et des evenements, mais les modeles synchronises dans le Hub ne generent pas de contenu pour les apprenants.
+
+Pour savoir si l'IA est reellement activee, verifier :
+
+- le runtime du prototype;
+- l'AIConfig resolue pour l'assignation;
+- le code serveur du runtime;
+- l'absence ou presence d'un appel provider pendant l'activite.
+
+En V0.8.4, l'etat attendu est : aucune generation IA dans le parcours apprenant.
+
+## Emplacement de `.env`
+
+Le fichier `.env` doit rester a la racine du workspace IC-Lab :
+
+`J:\2026\UGA\M2\Stage-Memoire\Applications\IC-Lab\.env`
+
+Il ne doit jamais etre committe.
+
+Verification :
+
+```powershell
+git check-ignore -v .env
+git ls-files .env
+```
+
+La premiere commande doit montrer une regle `.gitignore`. La seconde ne doit rien retourner.
+
+## Securite des cles
+
+Les cles provider restent cote serveur. L'admin peut afficher si une cle est detectee, mais jamais sa valeur.
+
+Principes :
+
+- ne jamais afficher le contenu de `.env`;
+- ne jamais logger une cle;
+- ne jamais appeler OpenAI depuis le navigateur;
+- ne jamais envoyer de texte apprenant a OpenAI sans runtime explicitement concu, audite et valide;
+- en cas de doute, desactiver `allowedForRuntime`.
+
+## Synchroniser OpenAI
+
+Depuis l'admin V0.8.4, le bouton de synchronisation appelle l'endpoint local :
+
+`POST /api/admin/ai/providers/openai/sync-models`
+
+Le navigateur contacte uniquement le Hub local. Le serveur contacte OpenAI pour lire la liste des modeles accessibles. Cette action ne lance aucune generation.
+
+## Verifier le mode JSON
+
+Depuis `prototypes/00-ic-hub/server` :
+
+```powershell
+node --check server.js
+node server.js
+```
+
+Puis ouvrir :
+
+`http://127.0.0.1:8790/admin-0.8.4.html`
+
+Verifier :
+
+- health en `store = json`;
+- admin V0.8.4 accessible;
+- checklist visible;
+- modeles recommandes ou message fallback;
+- teacher/student interdits sur les endpoints admin IA.
+
+## Verifier le mode MariaDB
+
+Depuis `prototypes/00-ic-hub/server` :
+
+```powershell
+node db/migrate-json-to-mariadb.js
+$env:IC_HUB_STORE="mariadb"
+node server.js
+```
+
+Puis ouvrir :
+
+`http://127.0.0.1:8790/admin-0.8.4.html`
+
+Verifier :
+
+- health en `store = mariadb`;
+- counts DB presents;
+- providers/modeles lisibles;
+- admin V0.8.4 accessible.
+
+## Savoir si l'IA est active ou non
+
+L'IA generative est consideree non active si :
+
+- Prototype 06 utilise encore le runtime scenarise;
+- aucune route runtime ne demande a un provider de generer un contenu apprenant;
+- les modeles sont seulement catalogues;
+- les AIConfig restent des profils administratifs.
+
+Un modele synchronise, recommande ou autorise runtime n'est pas une activation.
+
+## Procedure retour arriere d'urgence
+
+Cette procedure est guidee et manuelle. Il n'y a pas de bouton destructif automatique.
+
+1. Verifier que Prototype 06 utilise le runtime scenarise.
+2. Desactiver `allowedForRuntime` sur les modeles douteux.
+3. Repasser les AIConfig experimentales en `planned` ou `disabled`.
+4. Verifier que le bandeau admin indique toujours "aucune IA generative active".
+5. Relancer le Hub en mode JSON si besoin.
+6. Consulter ce guide mainteneur.
+
+En cas de doute : desactiver les modeles runtime et conserver le mode scenarise.
+
+## Retour arriere vers runtime scenarise
+
+Pour revenir a l'etat le plus prudent :
+
+1. garder ou remettre l'AIConfig scenarisee par defaut pour Prototype 06;
+2. desactiver `allowedForRuntime` sur les modeles incertains;
+3. laisser les providers en `planned` ou `disabled` si necessaire;
+4. relancer le Hub en mode JSON si MariaDB pose probleme;
+5. verifier que Prototype 06 lance toujours ses activites sans generation IA.
+
+## Ce qui active reellement l'IA
+
+Synchroniser les modeles OpenAI :
+
+- contacte OpenAI cote serveur;
+- recupere la liste des modeles;
+- ne genere aucun texte;
+- n'envoie aucun texte apprenant.
+
+Pour qu'une IA generative soit reellement active, il faudrait explicitement :
+
+1. associer une AIConfig a un modele autorise;
+2. creer un endpoint serveur de generation;
+3. modifier le runtime Prototype 06;
+4. autoriser le mode generatif;
+5. tester la securite;
+6. valider pedagogiquement.
+
+Aucun de ces elements n'est actif en V0.8.4.
+
+## Donnees apprenantes
+
+Dans l'etat actuel du prototype :
+
+- reponses apprenantes stockees dans les traces : non, seulement longueur / presence selon le flux existant;
+- reponses apprenantes envoyees a OpenAI : non;
+- textes generes par IA stockes : non;
+- audio IA genere : non;
+- donnees personnelles envoyees a un provider : non.
+
+## Checklist avant activation future
+
+Avant toute activation generative :
+
+- verifier base legale / cadre institutionnel;
+- verifier information des apprenants;
+- verifier minimisation des donnees;
+- ne jamais envoyer de texte libre apprenant sans justification;
+- tester avec prompts fictifs;
+- limiter duree et couts;
+- journaliser uniquement des metadonnees non sensibles;
+- prevoir desactivation immediate;
+- valider pedagogiquement avec enseignant responsable.
+
+## Prochaines etapes recommandees
+
+1. Verifier l'etat IA dans `admin-0.8.4.html`.
+2. Synchroniser les modeles si la cle serveur est presente.
+3. Marquer 2 ou 3 modeles texte comme `recommended` apres verification.
+4. Renseigner les prix depuis les tarifs officiels.
+5. Associer une AIConfig a un modele catalogue recommande.
+6. Tester cote serveur seulement.
+7. Brancher un parcours apprenant uniquement apres validation pedagogique, technique et budgetaire.

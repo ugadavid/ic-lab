@@ -231,6 +231,7 @@ CREATE TABLE IF NOT EXISTS ai_models (
   provider_id VARCHAR(128) NOT NULL,
   provider_model_id VARCHAR(255) NOT NULL,
   title VARCHAR(255) NOT NULL,
+  short_description TEXT NULL,
   family VARCHAR(128) NULL,
   modality VARCHAR(128) NULL,
   capabilities_json LONGTEXT NULL,
@@ -238,7 +239,15 @@ CREATE TABLE IF NOT EXISTS ai_models (
   source VARCHAR(128) NULL,
   context_window INT NULL,
   cost_level VARCHAR(64) NULL,
+  ic_lab_recommendation VARCHAR(128) NULL,
   recommended_use TEXT NULL,
+  pricing_json LONGTEXT NULL,
+  input_price_usd DECIMAL(12, 6) NULL,
+  cached_input_price_usd DECIMAL(12, 6) NULL,
+  output_price_usd DECIMAL(12, 6) NULL,
+  pricing_unit VARCHAR(128) NULL,
+  pricing_source VARCHAR(255) NULL,
+  pricing_last_checked_at VARCHAR(40) NULL,
   allowed_for_teachers TINYINT(1) NOT NULL DEFAULT 0,
   allowed_for_students TINYINT(1) NOT NULL DEFAULT 0,
   allowed_for_runtime TINYINT(1) NOT NULL DEFAULT 0,
@@ -251,8 +260,21 @@ CREATE TABLE IF NOT EXISTS ai_models (
   KEY idx_ai_models_family (family),
   KEY idx_ai_models_modality (modality),
   KEY idx_ai_models_status (status),
+  KEY idx_ai_models_recommendation (ic_lab_recommendation),
   KEY idx_ai_models_allowed_runtime (allowed_for_runtime)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE ai_models
+  ADD COLUMN IF NOT EXISTS short_description TEXT NULL,
+  ADD COLUMN IF NOT EXISTS ic_lab_recommendation VARCHAR(128) NULL,
+  ADD COLUMN IF NOT EXISTS pricing_json LONGTEXT NULL,
+  ADD COLUMN IF NOT EXISTS input_price_usd DECIMAL(12, 6) NULL,
+  ADD COLUMN IF NOT EXISTS cached_input_price_usd DECIMAL(12, 6) NULL,
+  ADD COLUMN IF NOT EXISTS output_price_usd DECIMAL(12, 6) NULL,
+  ADD COLUMN IF NOT EXISTS pricing_unit VARCHAR(128) NULL,
+  ADD COLUMN IF NOT EXISTS pricing_source VARCHAR(255) NULL,
+  ADD COLUMN IF NOT EXISTS pricing_last_checked_at VARCHAR(40) NULL,
+  ADD KEY IF NOT EXISTS idx_ai_models_recommendation (ic_lab_recommendation);
 
 CREATE TABLE IF NOT EXISTS activity_ai_config (
   id VARCHAR(128) NOT NULL PRIMARY KEY,

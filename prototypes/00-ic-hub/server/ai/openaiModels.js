@@ -109,6 +109,10 @@ async function syncOpenAiModels({ readModelsStore, writeModelsStore, now }) {
       allowedForStudents: previous?.allowedForStudents ?? model.allowedForStudents,
       allowedForRuntime: previous?.allowedForRuntime ?? model.allowedForRuntime,
       recommendedUse: previous?.recommendedUse || model.recommendedUse,
+      shortDescription: previous?.shortDescription || model.shortDescription || "",
+      icLabRecommendation: previous?.icLabRecommendation || model.icLabRecommendation || "",
+      pricing: previous?.pricing || model.pricing || null,
+      adminNotes: previous?.adminNotes || model.adminNotes || "",
       notes: previous?.notes || model.notes,
       costLevel: previous?.costLevel || model.costLevel
     });

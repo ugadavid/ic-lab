@@ -4,9 +4,10 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const openAiModels = require("./ai/openaiModels");
+const modelMetadataEnrichment = require("./ai/modelMetadataEnrichment");
 
 const PORT = Number(process.env.PORT || 8790);
-const VERSION = "0.8";
+const VERSION = "0.8.4";
 const SERVICE = "ic-hub-local";
 const ROOT_DIR = path.resolve(__dirname, "..");
 const PUBLIC_DIR = path.join(ROOT_DIR, "public");
@@ -51,7 +52,8 @@ const stores = {
   sharingSpaces: "sharing-spaces.json",
   aiConfigs: "ai-configs.json",
   aiProviders: "ai-providers.json",
-  aiModels: "ai-models.json"
+  aiModels: "ai-models.json",
+  aiModelMetadata: "ai-model-metadata.json"
 };
 
 const jsonWriteQueues = new Map();
@@ -276,6 +278,10 @@ const defaultStores = {
     version: "0.8",
     models: []
   },
+  aiModelMetadata: {
+    version: "0.8.1",
+    metadata: []
+  },
   prototypes: {
     prototypes: [
       {
@@ -323,7 +329,8 @@ const contentTypes = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
-  ".json": "application/json; charset=utf-8"
+  ".json": "application/json; charset=utf-8",
+  ".md": "text/markdown; charset=utf-8"
 };
 
 function now() {
@@ -470,6 +477,11 @@ const aiCostLevels = new Set(["free", "low", "medium", "high", "very-high"]);
 const aiRoles = new Set(["participant", "tutor", "observer", "multi-agent", "none"]);
 const DEFAULT_PROTO06_AI_CONFIG_ID = "aicfg_proto06_scripted_browser_voice";
 
+function parseOptionalPrice(value) {
+  if (value === null || value === undefined || value === "") return null;
+  return Number.isFinite(Number(value)) ? Number(value) : null;
+}
+
 function normalizeWarnings(value) {
   if (Array.isArray(value)) return value.map((item) => String(item).trim()).filter(Boolean);
   if (typeof value === "string") return value.split(/\r?\n/).map((item) => item.trim()).filter(Boolean);
@@ -539,6 +551,7 @@ function normalizeAiModel(input, existing = null) {
     providerId: String(input.providerId ?? existing?.providerId ?? "openai").trim(),
     providerModelId,
     title: String(input.title ?? existing?.title ?? (providerModelId || idValue)).trim(),
+    shortDescription: String(input.shortDescription ?? existing?.shortDescription ?? "").trim(),
     family: String(input.family ?? existing?.family ?? "").trim(),
     modality: String(input.modality ?? existing?.modality ?? "text").trim(),
     capabilities: Array.isArray(input.capabilities)
@@ -550,11 +563,21 @@ function normalizeAiModel(input, existing = null) {
       ? Math.max(0, Math.round(Number(input.contextWindow ?? existing?.contextWindow)))
       : null,
     costLevel: String(input.costLevel ?? existing?.costLevel ?? "unknown").trim(),
+    icLabRecommendation: String(input.icLabRecommendation ?? existing?.icLabRecommendation ?? "not_reviewed").trim(),
+    pricing: {
+      unit: String(input.pricing?.unit ?? existing?.pricing?.unit ?? input.pricingUnit ?? existing?.pricingUnit ?? "").trim(),
+      inputUsd: parseOptionalPrice(input.pricing?.inputUsd ?? existing?.pricing?.inputUsd ?? input.inputPriceUsd ?? existing?.inputPriceUsd),
+      cachedInputUsd: parseOptionalPrice(input.pricing?.cachedInputUsd ?? existing?.pricing?.cachedInputUsd ?? input.cachedInputPriceUsd ?? existing?.cachedInputPriceUsd),
+      outputUsd: parseOptionalPrice(input.pricing?.outputUsd ?? existing?.pricing?.outputUsd ?? input.outputPriceUsd ?? existing?.outputPriceUsd),
+      source: String(input.pricing?.source ?? existing?.pricing?.source ?? input.pricingSource ?? existing?.pricingSource ?? "").trim(),
+      lastCheckedAt: input.pricing?.lastCheckedAt ?? existing?.pricing?.lastCheckedAt ?? input.pricingLastCheckedAt ?? existing?.pricingLastCheckedAt ?? null
+    },
     recommendedUse: String(input.recommendedUse ?? existing?.recommendedUse ?? "").trim(),
     allowedForTeachers: Boolean(input.allowedForTeachers ?? existing?.allowedForTeachers ?? false),
     allowedForStudents: Boolean(input.allowedForStudents ?? existing?.allowedForStudents ?? false),
     allowedForRuntime: Boolean(input.allowedForRuntime ?? existing?.allowedForRuntime ?? false),
     notes: String(input.notes ?? existing?.notes ?? "").trim(),
+    adminNotes: String(input.adminNotes ?? existing?.adminNotes ?? "").trim(),
     createdAt: existing?.createdAt || input.createdAt || stamp,
     updatedAt: stamp,
     lastSeenAt: input.lastSeenAt ?? existing?.lastSeenAt ?? null
@@ -592,6 +615,19 @@ async function enrichAssignmentsWithAiConfig(assignments) {
     const aiConfig = configs.find((config) => config.id === aiConfigId) || null;
     return { ...assignment, aiConfigId, aiConfig };
   });
+}
+
+async function getEnrichedAiModelsStore() {
+  const [modelsStore, metadataStore] = await Promise.all([
+    readJson("aiModels"),
+    readJson("aiModelMetadata")
+  ]);
+  return {
+    ...modelsStore,
+    version: "0.8.4",
+    updatedAt: modelsStore.updatedAt || null,
+    models: modelMetadataEnrichment.enrichModels(modelsStore.models || [], metadataStore)
+  };
 }
 
 async function withJsonWriteLock(name, task) {
@@ -2067,9 +2103,10 @@ async function handleAdminAi(request, response, url, user) {
   }
 
   if (request.method === "GET" && url.pathname === "/api/admin/ai/models") {
-    const store = await readJson("aiModels");
+    const store = await getEnrichedAiModelsStore();
     return sendJson(response, 200, {
-      version: store.version || "0.8",
+      version: store.version || "0.8.4",
+      updatedAt: store.updatedAt || null,
       models: Array.isArray(store.models) ? store.models : []
     });
   }
@@ -2085,7 +2122,8 @@ async function handleAdminAi(request, response, url, user) {
         ok: true,
         syncedCount: result.syncedCount,
         totalModels: result.totalModels,
-        models: result.models
+        syncedAt: now(),
+        models: (await getEnrichedAiModelsStore()).models
       });
     } catch (error) {
       const status = error.code === "OPENAI_API_KEY_MISSING" ? 400 : 502;
@@ -2137,6 +2175,16 @@ async function handleAdminAi(request, response, url, user) {
         title: body.title ?? existing.title,
         status: body.status ?? existing.status,
         costLevel: body.costLevel ?? existing.costLevel,
+        shortDescription: body.shortDescription ?? existing.shortDescription,
+        icLabRecommendation: body.icLabRecommendation ?? existing.icLabRecommendation,
+        pricing: {
+          unit: body.pricingUnit ?? existing.pricing?.unit ?? "",
+          inputUsd: body.inputPriceUsd ?? existing.pricing?.inputUsd ?? null,
+          cachedInputUsd: body.cachedInputPriceUsd ?? existing.pricing?.cachedInputUsd ?? null,
+          outputUsd: body.outputPriceUsd ?? existing.pricing?.outputUsd ?? null,
+          source: body.pricingSource ?? existing.pricing?.source ?? "",
+          lastCheckedAt: body.pricingLastCheckedAt ?? existing.pricing?.lastCheckedAt ?? null
+        },
         recommendedUse: body.recommendedUse ?? existing.recommendedUse,
         allowedForTeachers: body.allowedForTeachers ?? existing.allowedForTeachers,
         allowedForStudents: body.allowedForStudents ?? existing.allowedForStudents,
@@ -2307,8 +2355,8 @@ async function serveStatic(response, url) {
   const redirects = new Map([
     ["/student.html", "/student-0.7.1.html"],
     ["/teacher.html", "/teacher-0.7.1.html"],
-    ["/hub.html", "/hub-0.8.html"],
-    ["/admin.html", "/admin-0.8.html"]
+    ["/hub.html", "/hub-0.8.4.html"],
+    ["/admin.html", "/admin-0.8.4.html"]
   ]);
   if (redirects.has(url.pathname)) {
     response.writeHead(302, { location: redirects.get(url.pathname) });
@@ -2317,8 +2365,10 @@ async function serveStatic(response, url) {
   }
 
   const requested = url.pathname === "/" ? "/login.html" : decodeURIComponent(url.pathname);
-  const target = path.resolve(PUBLIC_DIR, `.${requested}`);
-  if (!target.startsWith(PUBLIC_DIR)) {
+  const docsPrefix = "/docs/";
+  const baseDir = requested.startsWith(docsPrefix) ? ROOT_DIR : PUBLIC_DIR;
+  const target = path.resolve(baseDir, `.${requested}`);
+  if (!target.startsWith(baseDir)) {
     if (response.headersSent || response.writableEnded) return false;
     response.writeHead(403);
     response.end("Forbidden");
