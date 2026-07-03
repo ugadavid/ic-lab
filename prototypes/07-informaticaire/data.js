@@ -2034,6 +2034,253 @@ items.forEach((item) => {
   }, actorRegistryAugmentations[item.id] || {});
 });
 
+const v065ExternalLinks = {
+  miriadi: {
+    externalLinks: [
+      {
+        label: "Site Miriadi",
+        url: "https://www.miriadi.net/",
+        kind: "site officiel",
+        status: "accessible",
+        lastChecked: "2026-07-03",
+        note: "Site vivant du réseau Miriadi, ouvert pendant la vérification.",
+      },
+      {
+        label: "Ressources Miriadi",
+        url: "https://www.miriadi.net/ressources",
+        kind: "documentation",
+        status: "accessible",
+        lastChecked: "2026-07-03",
+        note: "Page ressources du site Miriadi, utile pour repérer référentiels, activités et corpus.",
+      },
+    ],
+  },
+  galanet: {
+    externalLinks: [
+      {
+        label: "Archive Galanet",
+        url: "https://web.archive.org/web/20120106192721/http://www.galanet.eu/",
+        kind: "archive",
+        status: "à vérifier",
+        lastChecked: "2026-07-03",
+        note: "Archive web repérée comme trace de l'ancien site Galanet ; contenu à contrôler avant réutilisation.",
+      },
+    ],
+  },
+  galapro: {
+    externalLinks: [
+      {
+        label: "Archive Galapro",
+        url: "http://arquivo.pt/wayback/20141121121652/http://www.galapro.eu/",
+        kind: "archive",
+        status: "à vérifier",
+        lastChecked: "2026-07-03",
+        note: "Piste d'archive pour l'ancien site Galapro ; accès et complétude à vérifier.",
+      },
+    ],
+  },
+  galatea: {
+    externalLinks: [],
+    todo: ["Rechercher un lien officiel, une archive fiable ou une notice institutionnelle pour Galatea."],
+  },
+  apicad: {
+    externalLinks: [
+      {
+        label: "Mention APICAD sur Miriadi",
+        url: "https://www.miriadi.net/",
+        kind: "à vérifier",
+        status: "accessible",
+        lastChecked: "2026-07-03",
+        note: "Le site Miriadi contient des actualités APICAD ; lien officiel APICAD dédié non confirmé pendant cette passe.",
+      },
+    ],
+  },
+  lecturio: {
+    externalLinks: [
+      {
+        label: "Corpus de contes Lectŭrĭo+",
+        url: "https://www.miriadi.net/ressources/corpus-contes",
+        kind: "page projet",
+        status: "accessible",
+        lastChecked: "2026-07-03",
+        note: "Page Miriadi présentant le corpus de contes comme production intellectuelle du projet Erasmus+ Lectŭrĭo+.",
+      },
+    ],
+  },
+  alpaga: {
+    externalLinks: [
+      {
+        label: "II Journée d'études ALPAGA",
+        url: "https://2jealpaga.sciencesconf.org/",
+        kind: "page projet",
+        status: "accessible",
+        lastChecked: "2026-07-03",
+        note: "Page Sciencesconf décrivant le projet ALPAGA, ses corpus UCIL-IC et RFC, et ses livrables.",
+      },
+      {
+        label: "Annonce ALPAGA sur Miriadi",
+        url: "https://www.miriadi.net/blogs/jette-mp/alpaga-2e-journee-d-etudes-12122025-sur-inscription",
+        kind: "page projet",
+        status: "accessible",
+        lastChecked: "2026-07-03",
+        note: "Annonce Miriadi de la journée ALPAGA, avec résumé du projet et contacts indiqués.",
+      },
+    ],
+  },
+  repli4c: {
+    externalLinks: [
+      {
+        label: "REPLI4C mentionné dans ALPAGA",
+        url: "https://2jealpaga.sciencesconf.org/",
+        kind: "page projet",
+        status: "accessible",
+        lastChecked: "2026-07-03",
+        note: "La page ALPAGA présente REPLI4C comme relais FORESEE 2026-2028 et donne la référence ANR-24-RSHS-0003.",
+      },
+    ],
+  },
+  "romanofonia-cinema": {
+    externalLinks: [
+      {
+        label: "Romanofonia e cinema dans ALPAGA",
+        url: "https://2jealpaga.sciencesconf.org/",
+        kind: "à vérifier",
+        status: "accessible",
+        lastChecked: "2026-07-03",
+        note: "La page ALPAGA mentionne les sessions Romanofonia e cinema et le corpus RFC ; page propre au dispositif non trouvée.",
+      },
+    ],
+  },
+  "ressources-unita": {
+    externalLinks: [
+      {
+        label: "UNITA Universitas Montium",
+        url: "https://univ-unita.eu/",
+        kind: "site officiel",
+        status: "accessible",
+        lastChecked: "2026-07-03",
+        note: "Site officiel de l'alliance UNITA, avec une entrée intercomprehension dans la navigation.",
+      },
+    ],
+  },
+  "elementi-unito": {
+    externalLinks: [],
+    todo: ["Rechercher l'URL officielle du cours Elementi di intercomprensione UniTO et ses conditions d'accès."],
+  },
+  phip: {
+    externalLinks: [
+      {
+        label: "Corpus de contes Miriadi",
+        url: "https://www.miriadi.net/ressources/corpus-contes",
+        kind: "à vérifier",
+        status: "accessible",
+        lastChecked: "2026-07-03",
+        note: "Page de corpus plurilingue pour très jeune public ; rapprochement avec PHIP à confirmer.",
+      },
+    ],
+  },
+  "itineraires-romans": {
+    externalLinks: [
+      {
+        label: "Piste Itinéraires romans Union Latine",
+        url: "http://unilat.org/DPEL/Intercomprehension/Itineraires_romans/fr",
+        kind: "à vérifier",
+        status: "à vérifier",
+        lastChecked: "2026-07-03",
+        note: "Ancienne URL repérée dans des listes de ressources ; disponibilité et archivage à confirmer.",
+      },
+    ],
+  },
+  eurom: {
+    externalLinks: [
+      {
+        label: "EuRom5 / EuRom Web",
+        url: "https://www.eurom5.com/",
+        kind: "site officiel",
+        status: "accessible",
+        lastChecked: "2026-07-03",
+        note: "Site EuRom Web accessible pendant la vérification.",
+      },
+    ],
+  },
+  elan: {
+    externalLinks: [
+      {
+        label: "ELAN - The Language Archive",
+        url: "https://archive.mpi.nl/tla/elan",
+        kind: "outil externe",
+        status: "accessible",
+        lastChecked: "2026-07-03",
+        note: "Page officielle de l'outil ELAN, maintenue par The Language Archive.",
+      },
+    ],
+  },
+  speechmatics: {
+    externalLinks: [
+      {
+        label: "Speechmatics",
+        url: "https://www.speechmatics.com/",
+        kind: "outil externe",
+        status: "accessible",
+        lastChecked: "2026-07-03",
+        note: "Site officiel Speechmatics pour speech-to-text et API vocales.",
+      },
+      {
+        label: "Documentation Speechmatics",
+        url: "https://docs.speechmatics.com/",
+        kind: "documentation",
+        status: "accessible",
+        lastChecked: "2026-07-03",
+        note: "Documentation développeur liée depuis le site officiel.",
+      },
+    ],
+  },
+  "nosketch-kiparla": {
+    externalLinks: [
+      {
+        label: "NoSketch Engine",
+        url: "https://www.sketchengine.eu/nosketch-engine/",
+        kind: "outil externe",
+        status: "accessible",
+        lastChecked: "2026-07-03",
+        note: "Page Sketch Engine présentant NoSketch Engine.",
+      },
+      {
+        label: "Corpus KIParla",
+        url: "https://kiparla.it/",
+        kind: "page projet",
+        status: "accessible",
+        lastChecked: "2026-07-03",
+        note: "Site du corpus KIParla, à relier précisément aux usages mentionnés dans la fiche.",
+      },
+    ],
+  },
+  "portail-ple-katia": {
+    externalLinks: [],
+    todo: ["Demander à Kátia le nom exact et l'URL du portail PLE avant d'ajouter un lien."],
+  },
+  evaluation: {
+    externalLinks: [
+      {
+        label: "Référentiels Miriadi REFIC / REFDIC",
+        url: "https://www.miriadi.net/ressources/referentiels",
+        kind: "documentation",
+        status: "accessible",
+        lastChecked: "2026-07-03",
+        note: "Page Miriadi présentant les référentiels de compétences liés à l'évaluation en intercompréhension.",
+      },
+    ],
+  },
+};
+
+items.forEach((item) => {
+  const external = v065ExternalLinks[item.id];
+  if (!external) return;
+  Object.assign(item, external, {
+    todo: [...(item.todo || []), ...(external.todo || [])],
+  });
+});
+
 const graphRows = [
   {
     actor: { id: "christian", label: "Christian" },

@@ -238,6 +238,7 @@
           <p class="eyebrow">Contribuer</p>
           <h2>Aider à compléter la mémoire commune</h2>
           <p>Un membre de la communauté peut signaler une ressource, compléter une fiche, ajouter un lien, préciser un contact, indiquer l'état d'une plateforme, ajouter une capture ou une archive, corriger une référence incertaine ou proposer une réutilisation pédagogique.</p>
+          <p>Une correction n'est pas appliquée automatiquement. Elle produit un brouillon relu humainement avant intégration.</p>
         </div>
         <form id="contribution-form" class="contribution-form">
           <label>
@@ -245,11 +246,11 @@
             <select id="contribution-type">
               <option value="ressource">Signaler une ressource</option>
               <option value="fiche">Compléter une fiche</option>
-              <option value="lien">Ajouter un lien</option>
+              <option value="external-link">Ajouter un lien externe</option>
               <option value="contact">Préciser un contact</option>
               <option value="etat">Indiquer un état actuel</option>
               <option value="archive">Ajouter une capture ou une archive</option>
-              <option value="correction">Corriger une référence incertaine</option>
+              <option value="correction">Proposer une correction</option>
               <option value="reutilisation">Proposer une réutilisation pédagogique</option>
             </select>
           </label>
@@ -258,8 +259,56 @@
             <select id="contribution-target"></select>
           </label>
           <label>
+            <span>Champ concerné</span>
+            <select id="correction-field">
+              <option value="">à préciser</option>
+              <option value="title">Titre</option>
+              <option value="description">Description</option>
+              <option value="status">État actuel</option>
+              <option value="period">Période</option>
+              <option value="actors">Acteurs liés</option>
+              <option value="relations">Relations</option>
+              <option value="evidence">Traçabilité documentaire</option>
+              <option value="recovery">Récupération</option>
+              <option value="rights">Droits / accès</option>
+              <option value="other">Autre</option>
+            </select>
+          </label>
+          <label>
             <span>Titre / lien / remarque</span>
             <textarea id="contribution-note" rows="4" placeholder="Ex. Je dispose de captures d'écran de l'interface Galanet."></textarea>
+          </label>
+          <label>
+            <span>Label du lien externe</span>
+            <input id="external-link-label" type="text" placeholder="Ex. Site Miriadi">
+          </label>
+          <label>
+            <span>URL du lien externe</span>
+            <input id="external-link-url" type="url" placeholder="https://...">
+          </label>
+          <label>
+            <span>Type de lien externe</span>
+            <select id="external-link-kind">
+              <option value="site officiel">site officiel</option>
+              <option value="page projet">page projet</option>
+              <option value="documentation">documentation</option>
+              <option value="archive">archive</option>
+              <option value="publication">publication</option>
+              <option value="outil externe">outil externe</option>
+              <option value="à vérifier">à vérifier</option>
+            </select>
+          </label>
+          <label>
+            <span>Valeur actuelle</span>
+            <textarea id="correction-current-value" rows="3" placeholder="Copier ou résumer l'information à corriger."></textarea>
+          </label>
+          <label>
+            <span>Correction proposée</span>
+            <textarea id="correction-proposed-value" rows="3" placeholder="Indiquer la formulation ou la donnée proposée."></textarea>
+          </label>
+          <label>
+            <span>Justification</span>
+            <textarea id="correction-reason" rows="3" placeholder="Expliquer pourquoi la correction est proposée et, si possible, indiquer une source."></textarea>
           </label>
           <label>
             <span>Nom ou contact facultatif</span>
@@ -278,7 +327,12 @@
             <button id="download-contribution-button" class="ghost-button" type="button" disabled>Exporter le brouillon JSON</button>
           </div>
         </form>
+        <p id="contribution-export-status" class="export-status" aria-live="polite"></p>
         <pre id="contribution-draft" class="draft-output" aria-live="polite"></pre>
+        <div id="correction-review" class="correction-review" aria-live="polite">
+          <h3>Corrections à relire</h3>
+          <p>Aucun brouillon de correction préparé pour le moment.</p>
+        </div>
       </section>
 
       <section id="graphe" class="section graph-section">

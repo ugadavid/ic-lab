@@ -683,6 +683,69 @@ main {
   white-space: pre-wrap;
 }
 
+.correction-review {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--line);
+  border-left: 5px solid var(--gold);
+  border-radius: 8px;
+}
+
+.correction-review h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.correction-review p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.correction-card {
+  display: grid;
+  gap: 6px;
+}
+
+.correction-card span {
+  color: var(--accent-strong);
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.external-links-list {
+  display: grid;
+  gap: 10px;
+}
+
+.external-link {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  background: rgba(45, 106, 115, 0.07);
+  border: 1px solid rgba(45, 106, 115, 0.22);
+  border-radius: 6px;
+}
+
+.external-link span {
+  color: var(--accent-strong);
+  font-weight: 800;
+}
+
+.external-link small,
+.external-link em {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-style: normal;
+}
+
+.external-link:hover {
+  border-color: var(--accent);
+  background: rgba(45, 106, 115, 0.12);
+}
+
 .concept-grid strong {
   font-size: 1rem;
 }
@@ -777,6 +840,10 @@ main {
   display: grid;
   gap: 12px;
   margin-bottom: 18px;
+}
+
+.detail-actions {
+  justify-content: flex-start;
 }
 
 .detail-header h2 {

@@ -65,6 +65,7 @@ const itemSearchText = (item) =>
     item.recovery?.status,
     item.recovery?.nextAction,
     item.recovery?.responsible,
+    ...((item.externalLinks || []).flatMap((link) => [link.label, link.url, link.kind, link.status, link.note])),
   ].join(" ");
 
 const matchesSearchText = (haystack, query) => {
@@ -124,6 +125,13 @@ const actorStatusPills = (item) => {
   if (item.actorKind?.includes("institution")) labels.push("Collectif");
   if (item.confidence === "à vérifier" || item.sourceStatus?.includes("vérifier") || item.uncertain) labels.push("À vérifier");
   return labels.map((label) => pill(label)).join("");
+};
+
+const externalLinkBadge = (item) => {
+  const links = item.externalLinks || [];
+  if (!links.length) return pill("Sans lien");
+  if (links.some((link) => link.status === "accessible")) return pill("Lien vérifié");
+  return pill("Lien à vérifier");
 };
 
 const renderActorCardDetails = (item) => {
@@ -226,6 +234,40 @@ const renderRecovery = (item) => {
       <div class="detail-group">
         <strong>Responsable</strong>
         <span>${item.recovery.responsible || "à définir"}</span>
+      </div>
+    </div>
+  `;
+};
+
+const renderExternalLinks = (item) => {
+  const links = item.externalLinks || [];
+  if (!links.length) {
+    return `
+      <div class="detail-card">
+        <div class="detail-group">
+          <strong>Liens externes vérifiés</strong>
+          <span>Aucun lien externe vérifié pour le moment.</span>
+        </div>
+      </div>
+    `;
+  }
+  return `
+    <div class="detail-card external-links-card">
+      <div class="detail-group">
+        <strong>Liens externes vérifiés</strong>
+        <div class="external-links-list">
+          ${links
+            .map(
+              (link) => `
+                <a class="external-link" href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">
+                  <span>${escapeHtml(link.label)}</span>
+                  <small>${escapeHtml(link.kind)} · ${escapeHtml(link.status)} · vérifié ${escapeHtml(link.lastChecked || "à dater")}</small>
+                  ${link.note ? `<em>${escapeHtml(link.note)}</em>` : ""}
+                </a>
+              `
+            )
+            .join("")}
+        </div>
       </div>
     </div>
   `;
@@ -434,11 +476,15 @@ const openDetail = (itemId) => {
         ${pill(item.status, slugStatus(item.status))}
         ${pill(item.status || "état à préciser")}
         ${actorStatusPills(item)}
+        ${externalLinkBadge(item)}
         ${item.communityPriority ? pill(`Priorité ${item.communityPriority}`) : ""}
       </div>
       <h2 id="detail-title">${item.title}</h2>
       <p>${item.longDescription || item.description}</p>
       <div class="mini-list">${(item.tags || []).map((tag) => pill(tag)).join("")}</div>
+      <div class="result-actions detail-actions">
+        <button class="ghost-button" type="button" data-propose-correction="${item.id}">Proposer une correction</button>
+      </div>
     </header>
     <div class="detail-grid">
       <div class="detail-card">
@@ -473,6 +519,7 @@ const openDetail = (itemId) => {
         </div>
       </div>
       ${recovery}
+      ${renderExternalLinks(item)}
       <div class="detail-card">${renderRelations(item)}</div>
       <div class="detail-card">
         <div class="detail-group"><strong>Traçabilité documentaire</strong><span>Repéré dans les entretiens et consolidé progressivement.</span></div>
@@ -578,6 +625,51 @@ const populateContributionTargets = () => {
 
 let latestContributionDraft = null;
 
+const correctionTemplate = (item) => [
+  `Fiche : ${item.title}`,
+  "Champ concerné : à préciser",
+  "Valeur actuelle : à copier depuis la fiche",
+  "Correction proposée :",
+  "Justification / source :",
+].join("\n");
+
+const renderCorrectionReview = (draft) => {
+  const container = document.querySelector("#correction-review");
+  if (!container) return;
+  if (!draft || draft.type !== "correction") {
+    container.innerHTML = `
+      <h3>Corrections à relire</h3>
+      <p>Aucun brouillon de correction préparé pour le moment.</p>
+    `;
+    return;
+  }
+  container.innerHTML = `
+    <h3>Corrections à relire</h3>
+    <article class="correction-card">
+      <strong>${escapeHtml(draft.targetTitle)}</strong>
+      <span>${escapeHtml(draft.field || "champ à préciser")}</span>
+      <p>${escapeHtml(draft.proposedValue || "Correction proposée à compléter.")}</p>
+    </article>
+  `;
+};
+
+const prefillCorrection = (itemId) => {
+  const item = itemById().get(itemId);
+  if (!item) return;
+  closeDetail();
+  document.querySelector("#contribution-type").value = "correction";
+  document.querySelector("#contribution-target").value = item.id;
+  document.querySelector("#correction-field").value = "description";
+  document.querySelector("#correction-current-value").value = item.description || item.longDescription || "";
+  document.querySelector("#correction-proposed-value").value = "";
+  document.querySelector("#correction-reason").value = "";
+  document.querySelector("#contribution-note").value = correctionTemplate(item);
+  document.querySelector("#contribution-confidence").value = "à vérifier";
+  document.querySelector("#contribution-contact").value = "";
+  highlightSection("#contribuer");
+  document.querySelector("#correction-field").focus({ preventScroll: true });
+};
+
 const prepareContribution = (event) => {
   event.preventDefault();
   const target = document.querySelector("#contribution-target").value;
@@ -585,18 +677,48 @@ const prepareContribution = (event) => {
   const note = document.querySelector("#contribution-note").value.trim();
   const confidence = document.querySelector("#contribution-confidence").value;
   const contact = document.querySelector("#contribution-contact").value.trim() || "à compléter";
-  latestContributionDraft = {
-    target,
-    targetTitle: itemById().get(target)?.title || target,
-    type,
-    note: note || "à compléter",
-    confidence,
-    contact,
-    createdAt: new Date().toISOString(),
-    nextStep: "Relire puis intégrer manuellement dans data.js après vérification communautaire.",
-  };
+  const targetTitle = itemById().get(target)?.title || target;
+  if (type === "correction") {
+    latestContributionDraft = {
+      type: "correction",
+      target,
+      targetTitle,
+      field: document.querySelector("#correction-field").value || "à préciser",
+      currentValue: document.querySelector("#correction-current-value").value.trim() || "à compléter",
+      proposedValue: document.querySelector("#correction-proposed-value").value.trim() || "à compléter",
+      reason: document.querySelector("#correction-reason").value.trim() || note || "à compléter",
+      confidence,
+      contact,
+      createdAt: new Date().toISOString(),
+    };
+  } else if (type === "external-link") {
+    latestContributionDraft = {
+      type: "external-link",
+      target,
+      targetTitle,
+      label: document.querySelector("#external-link-label").value.trim() || "à compléter",
+      url: document.querySelector("#external-link-url").value.trim() || "à compléter",
+      kind: document.querySelector("#external-link-kind").value || "à vérifier",
+      reason: note || "Lien proposé par la communauté, à vérifier avant intégration.",
+      confidence,
+      contact,
+      createdAt: new Date().toISOString(),
+    };
+  } else {
+    latestContributionDraft = {
+      target,
+      targetTitle,
+      type,
+      note: note || "à compléter",
+      confidence,
+      contact,
+      createdAt: new Date().toISOString(),
+      nextStep: "Relire puis intégrer manuellement dans data.js après vérification communautaire.",
+    };
+  }
   document.querySelector("#contribution-draft").textContent = JSON.stringify(latestContributionDraft, null, 2);
   document.querySelector("#download-contribution-button").disabled = false;
+  renderCorrectionReview(latestContributionDraft);
 };
 
 const exportContributionDraft = () => {
@@ -604,6 +726,7 @@ const exportContributionDraft = () => {
   const safeTarget = latestContributionDraft.target.replace(/[^a-z0-9-]/gi, "-");
   const filename = `informaticaire_contribution_${safeTarget}.json`;
   downloadFile(filename, "application/json;charset=utf-8", JSON.stringify(latestContributionDraft, null, 2));
+  document.querySelector("#contribution-export-status").textContent = `${filename} généré.`;
 };
 
 const highlightSection = (selector) => {
@@ -752,6 +875,12 @@ const bindEvents = () => {
     const closeButton = event.target.closest("[data-close-detail]");
     if (closeButton) {
       closeDetail();
+      return;
+    }
+
+    const correctionButton = event.target.closest("[data-propose-correction]");
+    if (correctionButton) {
+      prefillCorrection(correctionButton.dataset.proposeCorrection);
       return;
     }
 
