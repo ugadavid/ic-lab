@@ -5,18 +5,24 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const openAiModels = require("./ai/openaiModels");
 const modelMetadataEnrichment = require("./ai/modelMetadataEnrichment");
+const openAiRuntime = require("./ai/openaiRuntime");
 
 const PORT = Number(process.env.PORT || 8790);
-const VERSION = "0.8.4";
+const VERSION = "0.9";
 const SERVICE = "ic-hub-local";
 const ROOT_DIR = path.resolve(__dirname, "..");
 const PUBLIC_DIR = path.join(ROOT_DIR, "public");
+const DOCS_DIR = path.join(ROOT_DIR, "docs");
 const DATA_DIR = path.join(__dirname, "data");
 const WORKSPACE_DIR = path.resolve(ROOT_DIR, "..", "..");
 
 function loadRootEnv() {
   const envPath = path.join(WORKSPACE_DIR, ".env");
   if (!fsSync.existsSync(envPath)) return;
+  try {
+    require("dotenv").config({ path: envPath, override: false, quiet: true });
+    return;
+  } catch {}
   const raw = fsSync.readFileSync(envPath, "utf8");
   for (const line of raw.split(/\r?\n/)) {
     const trimmed = line.trim();
@@ -424,6 +430,18 @@ async function readJson(name) {
   }
 }
 
+async function readLocalJson(name) {
+  await ensureStoreFile(name);
+  const file = dataFile(name);
+  try {
+    const parsed = JSON.parse(await fs.readFile(file, "utf8"));
+    return parsed && typeof parsed === "object" ? parsed : freshDefaultStore(name);
+  } catch (error) {
+    console.error(`[data] failed to read ${stores[name]}: ${error.message}`);
+    throw new Error(`Lecture JSON impossible: ${stores[name]}`);
+  }
+}
+
 async function writeJson(name, data) {
   if (STORE_MODE === "mariadb" && mariaDbAvailable && mariaDbStore) {
     try {
@@ -466,6 +484,7 @@ async function storeHealth() {
   }
   try {
     const db = await mariaDbStore.healthSummary();
+    if (db.ok) lastMariaDbError = null;
     return { ...health, store: "mariadb", db: { ...db, lastError: lastMariaDbError } };
   } catch (error) {
     lastMariaDbError = error.message;
@@ -620,11 +639,11 @@ async function enrichAssignmentsWithAiConfig(assignments) {
 async function getEnrichedAiModelsStore() {
   const [modelsStore, metadataStore] = await Promise.all([
     readJson("aiModels"),
-    readJson("aiModelMetadata")
+    readLocalJson("aiModelMetadata")
   ]);
   return {
     ...modelsStore,
-    version: "0.8.4",
+    version: "0.9",
     updatedAt: modelsStore.updatedAt || null,
     models: modelMetadataEnrichment.enrichModels(modelsStore.models || [], metadataStore)
   };
@@ -2105,10 +2124,53 @@ async function handleAdminAi(request, response, url, user) {
   if (request.method === "GET" && url.pathname === "/api/admin/ai/models") {
     const store = await getEnrichedAiModelsStore();
     return sendJson(response, 200, {
-      version: store.version || "0.8.4",
+      version: store.version || "0.9",
       updatedAt: store.updatedAt || null,
       models: Array.isArray(store.models) ? store.models : []
     });
+  }
+
+  if (request.method === "GET" && url.pathname === "/api/admin/ai/runtime/status") {
+    return sendJson(response, 200, openAiRuntime.getOpenAiRuntimeStatus());
+  }
+
+  if (request.method === "POST" && url.pathname === "/api/admin/ai/runtime/smoke-test") {
+    const body = await readBody(request);
+    const started = Date.now();
+    try {
+      const store = await getEnrichedAiModelsStore();
+      const result = await openAiRuntime.runOpenAiSmokeTest({
+        modelCatalogId: String(body.modelCatalogId || "").trim(),
+        catalogModels: store.models || []
+      });
+      console.log(`[admin-ai-runtime] smoke-test model=${result.providerModelId} ok durationMs=${Date.now() - started}`);
+      return sendJson(response, 200, result);
+    } catch (error) {
+      console.error(`[admin-ai-runtime] smoke-test error=${error.code || "OPENAI_RUNTIME_ERROR"} durationMs=${Date.now() - started}`);
+      return sendJson(response, error.statusCode || 502, { ok: false, error: error.code || error.message || "OPENAI_RUNTIME_ERROR" });
+    }
+  }
+
+  if (request.method === "POST" && url.pathname === "/api/admin/ai/runtime/ic-agent-draft") {
+    const body = await readBody(request);
+    const started = Date.now();
+    try {
+      const store = await getEnrichedAiModelsStore();
+      const result = await openAiRuntime.generateIcAgentDraft({
+        modelCatalogId: String(body.modelCatalogId || "").trim(),
+        characterId: body.characterId,
+        targetLanguage: body.targetLanguage,
+        scenarioId: body.scenarioId,
+        climateTheme: body.climateTheme,
+        maxWords: body.maxWords,
+        catalogModels: store.models || []
+      });
+      console.log(`[admin-ai-runtime] ic-agent-draft model=${result.providerModelId} ok durationMs=${Date.now() - started}`);
+      return sendJson(response, 200, result);
+    } catch (error) {
+      console.error(`[admin-ai-runtime] ic-agent-draft error=${error.code || "OPENAI_RUNTIME_ERROR"} durationMs=${Date.now() - started}`);
+      return sendJson(response, error.statusCode || 502, { ok: false, error: error.code || error.message || "OPENAI_RUNTIME_ERROR" });
+    }
   }
 
   if (request.method === "POST" && url.pathname === "/api/admin/ai/providers/openai/sync-models") {
@@ -2355,8 +2417,8 @@ async function serveStatic(response, url) {
   const redirects = new Map([
     ["/student.html", "/student-0.7.1.html"],
     ["/teacher.html", "/teacher-0.7.1.html"],
-    ["/hub.html", "/hub-0.8.4.html"],
-    ["/admin.html", "/admin-0.8.4.html"]
+    ["/hub.html", "/hub-0.9.html"],
+    ["/admin.html", "/admin-0.9.html"]
   ]);
   if (redirects.has(url.pathname)) {
     response.writeHead(302, { location: redirects.get(url.pathname) });
@@ -2366,9 +2428,11 @@ async function serveStatic(response, url) {
 
   const requested = url.pathname === "/" ? "/login.html" : decodeURIComponent(url.pathname);
   const docsPrefix = "/docs/";
-  const baseDir = requested.startsWith(docsPrefix) ? ROOT_DIR : PUBLIC_DIR;
-  const target = path.resolve(baseDir, `.${requested}`);
-  if (!target.startsWith(baseDir)) {
+  const isDocsRequest = requested.startsWith(docsPrefix);
+  const baseDir = isDocsRequest ? DOCS_DIR : PUBLIC_DIR;
+  const relativeRequest = isDocsRequest ? requested.slice(docsPrefix.length) : `.${requested}`;
+  const target = path.resolve(baseDir, relativeRequest);
+  if (target !== baseDir && !target.startsWith(`${baseDir}${path.sep}`)) {
     if (response.headersSent || response.writableEnded) return false;
     response.writeHead(403);
     response.end("Forbidden");

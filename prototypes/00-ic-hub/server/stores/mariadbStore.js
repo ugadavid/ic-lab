@@ -491,7 +491,7 @@ async function writeStore(name, store) {
         `INSERT INTO sessions (id, user_id, token_hash, created_at, expires_at, last_seen_at)
          VALUES (?, ?, ?, ?, ?, ?)
          ON DUPLICATE KEY UPDATE user_id=VALUES(user_id), token_hash=VALUES(token_hash), created_at=VALUES(created_at), expires_at=VALUES(expires_at), last_seen_at=VALUES(last_seen_at)`,
-        [sessionId, session.userId, session.tokenHash || tokenHash(session.token), session.createdAt || null, session.expiresAt || null, session.lastSeenAt || null]
+        [sessionId, session.userId, session.tokenHash || (session.token ? tokenHash(session.token) : null), session.createdAt || null, session.expiresAt || null, session.lastSeenAt || null]
       );
     }
     if (ids.length) {
